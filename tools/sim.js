@@ -19,6 +19,9 @@ import { getSpell } from '../src/data/spells.js'
 import { BATTLE_PHASES, createBattle, resolveRound } from '../src/engine/battle/battle.js'
 import { effectiveStats, isDown } from '../src/engine/battle/combatant.js'
 import { getEnemy } from '../src/data/enemies.js'
+import { WORLD_NODES } from '../src/data/world.js'
+import { DUNGEONS } from '../src/data/maps/index.js'
+import { ENCOUNTER_TABLES } from '../src/data/encounterTables.js'
 import { getItem } from '../src/data/items.js'
 import { canEquip } from '../src/engine/inventory.js'
 
@@ -332,37 +335,89 @@ function printRow(label, result) {
   )
 }
 
-/** Rough intended level for each area, used by --sweep. */
-const SWEEP = [
-  { level: 1, enemies: ['giantRat', 'giantRat'] },
-  { level: 2, enemies: ['goblin', 'goblin'] },
-  { level: 4, enemies: ['wildBoar', 'wasp', 'wasp'] },
-  { level: 6, enemies: ['goblinChief'] },
-  { level: 7, enemies: ['kobold', 'caveBat'] },
-  { level: 9, enemies: ['skeleton', 'skeleton', 'mineSlime'] },
-  { level: 12, enemies: ['mineWarden'] },
-  { level: 13, enemies: ['pirate', 'sahagin'] },
-  { level: 15, enemies: ['mudToad', 'willOWisp'] },
-  { level: 18, enemies: ['tideSerpent'] },
-  { level: 20, enemies: ['harpy', 'gargoyle'] },
-  { level: 23, enemies: ['stormElemental', 'wyvern'] },
-  { level: 26, enemies: ['stormLord'] },
-  { level: 28, enemies: ['ghoul', 'wraith'] },
-  { level: 30, enemies: ['boneKnight', 'lichAcolyte'] },
-  { level: 32, enemies: ['boneTyrant'] },
-  { level: 35, enemies: ['fireDrake', 'shade'] },
-  { level: 38, enemies: ['dreadKnight', 'magmaGolem'] },
-  { level: 40, enemies: ['emberKing'] },
-]
+/**
+ * The sweep is derived from the game's own content, not a list kept in step by
+ * hand: every dungeon's recommended level, every group in its encounter table,
+ * and every boss standing in it. Add an enemy to a table and it shows up here.
+ */
+function sweepRows() {
+  const rows = []
+
+  for (const node of Object.values(WORLD_NODES)) {
+    if (node.kind !== 'dungeon') continue
+    const dungeon = DUNGEONS[node.dungeonId]
+    const level = node.recommended ?? 1
+    const table = ENCOUNTER_TABLES[dungeon.zone]
+
+    for (const group of table.groups) {
+      rows.push({ area: dungeon.name, level, enemies: group.enemies, kind: 'random' })
+    }
+
+    for (const floor of dungeon.floors) {
+      for (const detail of Object.values(floor.props)) {
+        if (detail.kind !== 'boss') continue
+        rows.push({
+          area: dungeon.name,
+          // A boss is fought at the end of its dungeon, a couple of levels on.
+          level: level + 2,
+          enemies: detail.enemyIds,
+          kind: 'boss',
+        })
+      }
+    }
+  }
+
+  return rows
+}
 
 const args = parseArgs(process.argv)
 
 if (args.sweep) {
   console.log(`party: ${args.classes.join(', ')}   runs: ${args.runs} each\n`)
-  for (const entry of SWEEP) {
+  let area = null
+  const offenders = []
+
+  for (const entry of sweepRows()) {
+    if (entry.area !== area) {
+      area = entry.area
+      console.log(`\n== ${area}`)
+    }
     const result = simulate({ ...args, level: entry.level, enemies: entry.enemies })
-    printRow(`Lv${String(entry.level).padStart(2)}  ${entry.enemies.join('+')}`, result)
+    printRow(
+      `Lv${String(entry.level).padStart(2)} ${entry.kind === 'boss' ? '*' : ' '} ${entry.enemies.join('+')}`,
+      result,
+    )
+
+    /*
+     * Win rate alone is the wrong measure for a boss. The auto-battler plays
+     * competently -- it revives, group-heals and drinks -- so a good early
+     * boss can sit at 100% and still be a real fight if it drains the party
+     * getting there. What matters is whether it costs anything.
+     */
+    if (entry.kind === 'boss') {
+      if (result.winRate < 0.45) {
+        offenders.push(
+          `${entry.area} Lv${entry.level} ${entry.enemies.join('+')} -> ${percent(result.winRate)} (too hard)`,
+        )
+      } else if (result.winRate > 0.98 && result.avgHpLeft > 0.72 && result.avgMpSpent < 0.45) {
+        offenders.push(
+          `${entry.area} Lv${entry.level} ${entry.enemies.join('+')} is free (${percent(result.avgHpLeft)} hp, ${percent(result.avgMpSpent)} mp)`,
+        )
+      }
+    } else if (result.winRate < 0.85) {
+      offenders.push(
+        `${entry.area} Lv${entry.level} ${entry.enemies.join('+')} -> ${percent(result.winRate)} (too hard)`,
+      )
+    }
+    if (entry.kind === 'random' && result.avgHpLeft > 0.92) {
+      offenders.push(
+        `${entry.area} Lv${entry.level} ${entry.enemies.join('+')} costs nothing (${percent(result.avgHpLeft)} hp left)`,
+      )
+    }
   }
+
+  console.log(`\n${offenders.length} out of band:`)
+  for (const line of offenders) console.log(`  ${line}`)
 } else {
   const result = simulate(args)
   console.log(`party: ${args.classes.join(', ')} at level ${args.level}`)
