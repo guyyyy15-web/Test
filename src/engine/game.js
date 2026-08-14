@@ -1,8 +1,10 @@
 import { PARTY_SIZE, STARTING_EQUIPMENT, STARTING_GOLD, STARTING_INVENTORY } from '../data/progression.js'
 import { getItem } from '../data/items.js'
 import { floorFor, getDungeon, getFloor } from '../data/maps/index.js'
+import { getTown } from '../data/towns/index.js'
+import { STARTING_NODE, getNode, isUnlocked } from '../data/world.js'
 import { getSpell, isFieldSpell } from '../data/spells.js'
-import { createCharacter, isActive } from './character.js'
+import { createCharacter, isActive, restore } from './character.js'
 import { applyBattleResult, createBattle } from './battle/battle.js'
 import { applyEffect, fieldEffectForSpell } from './effects.js'
 import { addItem, buy, equipItem, removeItem, sell, unequipSlot } from './inventory.js'
@@ -74,6 +76,15 @@ function replaceMember(party, index, member) {
   return next
 }
 
+function toWorldMap(state) {
+  return {
+    ...state,
+    mode: MODES.WORLD,
+    location: { type: 'world', nodeId: state.location?.nodeId ?? STARTING_NODE },
+    notice: null,
+  }
+}
+
 /** What stepping onto a chest, staircase, boss marker or exit does. */
 function applyTrigger(state, floor, trigger, rng) {
   switch (trigger.kind) {
@@ -124,8 +135,7 @@ function applyTrigger(state, floor, trigger, rng) {
       }
 
     case 'exit':
-      // Phase 5 replaces this with a return to the world map.
-      return { ...state, mode: MODES.MENU, notice: null }
+      return toWorldMap(state)
 
     default:
       return state
@@ -169,7 +179,12 @@ const handlers = {
     ),
     gold: STARTING_GOLD,
     inventory: STARTING_INVENTORY.map((entry) => ({ ...entry })),
-    mode: action.mode ?? MODES.MENU,
+    location: {
+      type: 'town',
+      nodeId: STARTING_NODE,
+      townId: getNode(STARTING_NODE).townId,
+    },
+    mode: action.mode ?? MODES.TOWN,
   }),
 
   updateParty: (state, action) => ({ ...state, party: action.party }),
@@ -344,12 +359,53 @@ const handlers = {
       }
     }),
 
-  leaveDungeon: (state) => ({
-    ...state,
-    // Phase 5 replaces this with the world map.
-    mode: MODES.MENU,
-    notice: null,
-  }),
+  leaveDungeon: (state) => toWorldMap(state),
+
+  toWorldMap: (state) => toWorldMap(state),
+
+  /** Travel between world-map nodes. Gated nodes simply refuse. */
+  travel: (state, action) => {
+    const node = getNode(action.nodeId)
+    if (!isUnlocked(node, state.flags)) return state
+
+    if (node.kind === 'town') {
+      return {
+        ...state,
+        mode: MODES.TOWN,
+        location: { type: 'town', nodeId: node.id, townId: node.townId },
+        notice: null,
+      }
+    }
+
+    const floor = getFloor(node.dungeonId, node.floorId)
+    return {
+      ...state,
+      mode: MODES.DUNGEON,
+      location: {
+        type: 'dungeon',
+        nodeId: node.id,
+        dungeonId: node.dungeonId,
+        floorId: node.floorId,
+        x: floor.spawn.x,
+        y: floor.spawn.y,
+        facing: 'down',
+      },
+      stepsSinceEncounter: 0,
+      notice: null,
+    }
+  },
+
+  /** The inn: the classic full restore, including the dead. */
+  restAtInn: (state) => {
+    const town = getTown(state.location?.townId)
+    if (state.gold < town.inn.price) return state
+    return {
+      ...state,
+      gold: state.gold - town.inn.price,
+      party: state.party.map(restore),
+      notice: 'The party wakes rested.',
+    }
+  },
 
   clearNotice: (state) => (state.notice ? { ...state, notice: null } : state),
 
@@ -366,7 +422,7 @@ const handlers = {
     const onVictory = battle.onVictory
     return {
       ...next,
-      mode: wiped ? MODES.GAME_OVER : (battle.returnMode ?? action.returnMode ?? MODES.MENU),
+      mode: wiped ? MODES.GAME_OVER : (battle.returnMode ?? action.returnMode ?? MODES.WORLD),
       ...(won && onVictory
         ? {
             flags: onVictory.flag

@@ -21,6 +21,13 @@ import Window from '../components/Window.jsx'
  * back one step" without any panel needing to know who pushed it.
  */
 
+/** Closing the menu returns to whatever kind of place the party is standing in. */
+const MODE_FOR_LOCATION = {
+  world: MODES.WORLD,
+  town: MODES.TOWN,
+  dungeon: MODES.DUNGEON,
+}
+
 const STAT_ROWS = [
   ['attack', 'Attack'],
   ['defense', 'Defense'],
@@ -156,10 +163,7 @@ export function PartyMenuScreen() {
       { key: 'magic', label: 'Magic' },
       { key: 'equip', label: 'Equip' },
       { key: 'status', label: 'Status' },
-      // Scaffolding until Phase 5 puts a world map in front of the dungeon.
-      state.location
-        ? { key: 'close', label: 'Close' }
-        : { key: 'enterDungeon', label: 'Enter the Ember Mine' },
+      { key: 'close', label: 'Close' },
       { key: 'quit', label: 'Quit to Title' },
     ]
 
@@ -174,9 +178,7 @@ export function PartyMenuScreen() {
           onSelect={(item) => {
             if (item.key === 'quit') dispatch({ type: 'returnToTitle' })
             else if (item.key === 'close')
-              dispatch({ type: 'setMode', mode: MODES.DUNGEON })
-            else if (item.key === 'enterDungeon')
-              dispatch({ type: 'enterDungeon', dungeonId: 'emberMine', floorId: 'b1' })
+              dispatch({ type: 'setMode', mode: MODE_FOR_LOCATION[state.location?.type] ?? MODES.WORLD })
             else push({ panel: item.key })
           }}
         />

@@ -6,6 +6,8 @@ import GameOverScreen from './ui/screens/GameOverScreen.jsx'
 import PartyCreationScreen from './ui/screens/PartyCreationScreen.jsx'
 import PartyMenuScreen from './ui/screens/PartyMenuScreen.jsx'
 import TitleScreen from './ui/screens/TitleScreen.jsx'
+import TownScreen from './ui/screens/TownScreen.jsx'
+import WorldMapScreen from './ui/screens/WorldMapScreen.jsx'
 
 /**
  * Root shell. One screen is mounted at a time, chosen by `state.mode`.
@@ -18,6 +20,8 @@ const SCREENS = {
   [MODES.BATTLE]: BattleScreen,
   [MODES.GAME_OVER]: GameOverScreen,
   [MODES.DUNGEON]: DungeonScreen,
+  [MODES.WORLD]: WorldMapScreen,
+  [MODES.TOWN]: TownScreen,
 }
 
 function Placeholder({ mode }) {
