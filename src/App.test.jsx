@@ -1,56 +1,52 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import App from './App.jsx'
+import { GameProvider } from './ui/GameProvider.jsx'
+import { InputProvider } from './ui/input/InputContext.jsx'
 
-describe('App', () => {
-  it('renders the heading', () => {
-    render(<App />)
-    expect(screen.getByText('Task Tracker')).toBeInTheDocument()
+function renderGame() {
+  return render(
+    <InputProvider>
+      <GameProvider>
+        <App />
+      </GameProvider>
+    </InputProvider>,
+  )
+}
+
+describe('App shell', () => {
+  it('opens on the title screen', () => {
+    renderGame()
+    expect(screen.getByText('EMBER CROWN')).toBeInTheDocument()
+    expect(screen.getByText('New Game')).toBeInTheDocument()
   })
 
-  it('shows empty state message', () => {
-    render(<App />)
-    expect(screen.getByText('No tasks yet. Add one above!')).toBeInTheDocument()
+  it('disables Continue when there is no save data', () => {
+    renderGame()
+    expect(screen.getByText('Continue').closest('button')).toBeDisabled()
   })
 
-  it('adds a new task', () => {
-    render(<App />)
-    const input = screen.getByPlaceholderText('Add a new task...')
-    const button = screen.getByText('Add')
-
-    fireEvent.change(input, { target: { value: 'Buy groceries' } })
-    fireEvent.click(button)
-
-    expect(screen.getByText('Buy groceries')).toBeInTheDocument()
-    expect(screen.getByText('1 tasks remaining')).toBeInTheDocument()
+  it('leaves the title screen when a new game starts', () => {
+    renderGame()
+    fireEvent.click(screen.getByText('New Game'))
+    expect(screen.queryByText('EMBER CROWN')).not.toBeInTheDocument()
   })
 
-  it('toggles a task as done', () => {
-    render(<App />)
-    const input = screen.getByPlaceholderText('Add a new task...')
-    const addBtn = screen.getByText('Add')
+  it('drives the cursor with the keyboard', () => {
+    renderGame()
+    const newGame = screen.getByText('New Game').closest('button')
+    expect(newGame).toHaveAttribute('aria-current', 'true')
 
-    fireEvent.change(input, { target: { value: 'Test task' } })
-    fireEvent.click(addBtn)
-
-    const checkbox = screen.getByRole('checkbox')
-    fireEvent.click(checkbox)
-
-    expect(checkbox).toBeChecked()
-    expect(screen.getByText('0 tasks remaining')).toBeInTheDocument()
+    fireEvent.keyDown(window, { code: 'ArrowDown' })
+    expect(screen.getByText('Continue').closest('button')).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
   })
 
-  it('removes a task', () => {
-    render(<App />)
-    const input = screen.getByPlaceholderText('Add a new task...')
-    const addBtn = screen.getByText('Add')
-
-    fireEvent.change(input, { target: { value: 'Delete me' } })
-    fireEvent.click(addBtn)
-
-    const removeBtn = screen.getByLabelText('Remove task')
-    fireEvent.click(removeBtn)
-
-    expect(screen.queryByText('Delete me')).not.toBeInTheDocument()
+  it('starts a new game from the keyboard confirm key', () => {
+    renderGame()
+    fireEvent.keyDown(window, { code: 'Enter' })
+    expect(screen.queryByText('EMBER CROWN')).not.toBeInTheDocument()
   })
 })

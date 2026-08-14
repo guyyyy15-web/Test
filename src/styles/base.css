@@ -1,0 +1,174 @@
+/* Global reset, palette and the fixed non-scrolling app shell. */
+
+:root {
+  color-scheme: dark;
+
+  /* Palette: classic dark-blue JRPG windows on black. */
+  --c-bg: #04050d;
+  --c-window-top: #1b2a6b;
+  --c-window-bottom: #0a1038;
+  --c-border-light: #eef2ff;
+  --c-border-dark: #46579f;
+  --c-text: #ffffff;
+  --c-text-dim: #93a0d6;
+  --c-text-disabled: #5a6392;
+  --c-accent: #ffd23f;
+  --c-hp: #58d68d;
+  --c-mp: #5dade2;
+  --c-xp: #b07cd6;
+  --c-danger: #e8503a;
+
+  --font-ui: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, Consolas,
+    'Courier New', monospace;
+
+  /* Type and spacing scale on the viewport so one layout serves phone+desktop. */
+  --fs-xs: clamp(10px, 2.2vw, 12px);
+  --fs-sm: clamp(11px, 2.7vw, 14px);
+  --fs-md: clamp(13px, 3.3vw, 17px);
+  --fs-lg: clamp(16px, 4.2vw, 22px);
+  --fs-xl: clamp(22px, 6.5vw, 40px);
+
+  --space-1: clamp(3px, 0.8vw, 5px);
+  --space-2: clamp(6px, 1.6vw, 10px);
+  --space-3: clamp(10px, 2.6vw, 16px);
+  --space-4: clamp(16px, 4vw, 26px);
+
+  /* Minimum comfortable touch target. */
+  --tap: 44px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-md);
+  line-height: 1.45;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#root {
+  display: flex;
+  justify-content: center;
+}
+
+/*
+ * The shell never scrolls. Height is dvh so mobile browser chrome collapsing
+ * does not leave a gap, and touch-action:none stops pinch/double-tap zoom and
+ * rubber-band scroll from fighting the d-pad.
+ */
+.app-shell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1024px;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  touch-action: none;
+}
+
+/* Every screen fills the shell and manages its own internal layout. */
+.screen {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+
+.screen--center {
+  align-items: center;
+  justify-content: center;
+}
+
+/* Text inputs are the one place the browser keyboard is welcome. */
+input[type='text'] {
+  min-height: var(--tap);
+  padding: 0 var(--space-2);
+  border: 2px solid var(--c-border-dark);
+  border-radius: 2px;
+  background: var(--c-window-bottom);
+  color: var(--c-text);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+input[type='text']:focus {
+  border-color: var(--c-accent);
+  outline: none;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.u-dim {
+  color: var(--c-text-dim);
+}
+
+.u-accent {
+  color: var(--c-accent);
+}
+
+.u-danger {
+  color: var(--c-danger);
+}
+
+.u-center {
+  text-align: center;
+}
+
+.u-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.u-spacer {
+  flex: 1;
+}
+
+.u-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

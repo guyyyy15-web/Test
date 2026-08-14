@@ -1,0 +1,282 @@
+/* The retro UI kit: windows, menus, cursor, bars, text box, d-pad. */
+
+/* ---------------------------------------------------------------- Window -- */
+
+.window {
+  position: relative;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--c-border-light);
+  border-radius: 3px;
+  background: linear-gradient(
+    180deg,
+    var(--c-window-top) 0%,
+    var(--c-window-bottom) 100%
+  );
+  box-shadow:
+    inset 0 0 0 2px var(--c-border-dark),
+    0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.window--flush {
+  padding: var(--space-1) var(--space-2);
+}
+
+.window__title {
+  margin: calc(var(--space-2) * -1) calc(var(--space-3) * -1) var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-bottom: 2px solid var(--c-border-dark);
+  color: var(--c-accent);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------ Menu -- */
+
+.menu {
+  display: grid;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--tap);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 2px;
+  color: var(--c-text);
+  text-align: left;
+}
+
+.menu__item--disabled {
+  color: var(--c-text-disabled);
+  cursor: default;
+}
+
+.menu__item--active {
+  background: rgba(255, 210, 63, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(255, 210, 63, 0.5);
+}
+
+/* The cursor keeps its space when hidden so rows never shift. */
+.menu__cursor {
+  flex: none;
+  width: 1em;
+  color: var(--c-accent);
+  animation: cursor-pulse 0.9s steps(2, end) infinite;
+}
+
+.menu__cursor--hidden {
+  visibility: hidden;
+  animation: none;
+}
+
+@keyframes cursor-pulse {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0.35;
+  }
+}
+
+.menu__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu__detail {
+  flex: none;
+  color: var(--c-text-dim);
+  font-size: var(--fs-sm);
+}
+
+.menu__empty {
+  padding: var(--space-2);
+  color: var(--c-text-dim);
+  text-align: center;
+}
+
+/* ------------------------------------------------------------------ Bars -- */
+
+.bar {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border: 1px solid var(--c-border-dark);
+  border-radius: 3px;
+  background: #05081c;
+}
+
+.bar__fill {
+  height: 100%;
+  transition: width 220ms ease-out;
+}
+
+.bar__fill--hp {
+  background: var(--c-hp);
+}
+
+.bar__fill--mp {
+  background: var(--c-mp);
+}
+
+.bar__fill--xp {
+  background: var(--c-xp);
+}
+
+.bar__fill--low {
+  background: var(--c-danger);
+}
+
+/* -------------------------------------------------------------- Text box -- */
+
+.textbox {
+  min-height: 4.5em;
+  white-space: pre-wrap;
+}
+
+.textbox__more {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-1);
+  color: var(--c-accent);
+  animation: bounce 0.8s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+/* ----------------------------------------------------------------- D-pad -- */
+
+/*
+ * Touch controls. Hidden on devices with a real pointer, shown on coarse
+ * ones -- but a screen can force them on for testing.
+ */
+.touch-controls {
+  display: none;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  touch-action: none;
+}
+
+@media (pointer: coarse) {
+  .touch-controls {
+    display: flex;
+  }
+}
+
+.touch-controls--forced {
+  display: flex;
+}
+
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, var(--tap));
+  grid-template-rows: repeat(3, var(--tap));
+}
+
+.dpad__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--c-border-dark);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #29346f, #141a45);
+  color: var(--c-text);
+  font-size: var(--fs-md);
+  touch-action: none;
+}
+
+.dpad__btn--up {
+  grid-area: 1 / 2;
+}
+.dpad__btn--left {
+  grid-area: 2 / 1;
+}
+.dpad__btn--right {
+  grid-area: 2 / 3;
+}
+.dpad__btn--down {
+  grid-area: 3 / 2;
+}
+
+.dpad__btn--held {
+  background: var(--c-accent);
+  color: #1a1400;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--tap) * 1.15);
+  height: calc(var(--tap) * 1.15);
+  border: 2px solid var(--c-border-light);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #29346f, #141a45);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.06em;
+  touch-action: none;
+}
+
+.action-btn--held {
+  background: var(--c-accent);
+  color: #1a1400;
+}
+
+/* ----------------------------------------------------------------- Title -- */
+
+.title-screen__logo {
+  margin: 0;
+  color: var(--c-accent);
+  font-size: var(--fs-xl);
+  letter-spacing: 0.16em;
+  text-align: center;
+  text-shadow: 0 3px 0 #7a4a00, 0 0 18px rgba(255, 210, 63, 0.35);
+}
+
+.title-screen__subtitle {
+  margin: var(--space-2) 0 var(--space-4);
+  color: var(--c-text-dim);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.title-screen__menu {
+  width: min(320px, 80vw);
+}
+
+.title-screen__hint {
+  margin-top: var(--space-4);
+  color: var(--c-text-disabled);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
