@@ -50,6 +50,8 @@ export function createBattle({
   canFlee = true,
   opening,
   background = 'plains',
+  returnMode = null,
+  onVictory = null,
 }) {
   const rng = makeRng(seed)
 
@@ -69,6 +71,11 @@ export function createBattle({
     canFlee,
     fleeAttempts: 0,
     background,
+    // Where to go when the dust settles, and what winning is worth beyond
+    // XP -- a boss flag, a key item. Carried on the battle so the screen that
+    // started the fight does not have to still be around to remember.
+    returnMode,
+    onVictory,
     rngState: rng.state,
     rewards: null,
   }

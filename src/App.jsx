@@ -1,6 +1,7 @@
 import { MODES } from './engine/game.js'
 import { useGame } from './ui/GameProvider.jsx'
 import BattleScreen from './ui/screens/BattleScreen.jsx'
+import DungeonScreen from './ui/screens/DungeonScreen.jsx'
 import GameOverScreen from './ui/screens/GameOverScreen.jsx'
 import PartyCreationScreen from './ui/screens/PartyCreationScreen.jsx'
 import PartyMenuScreen from './ui/screens/PartyMenuScreen.jsx'
@@ -16,6 +17,7 @@ const SCREENS = {
   [MODES.MENU]: PartyMenuScreen,
   [MODES.BATTLE]: BattleScreen,
   [MODES.GAME_OVER]: GameOverScreen,
+  [MODES.DUNGEON]: DungeonScreen,
 }
 
 function Placeholder({ mode }) {

@@ -1,11 +1,14 @@
 import { PARTY_SIZE, STARTING_EQUIPMENT, STARTING_GOLD, STARTING_INVENTORY } from '../data/progression.js'
 import { getItem } from '../data/items.js'
+import { floorFor, getDungeon, getFloor } from '../data/maps/index.js'
 import { getSpell, isFieldSpell } from '../data/spells.js'
 import { createCharacter, isActive } from './character.js'
 import { applyBattleResult, createBattle } from './battle/battle.js'
 import { applyEffect, fieldEffectForSpell } from './effects.js'
 import { addItem, buy, equipItem, removeItem, sell, unequipSlot } from './inventory.js'
 import { makeRng, randomSeed } from './rng.js'
+import { rollEncounter } from './world/encounters.js'
+import { chestFlag, stepFrom, triggerAt } from './world/tilemap.js'
 
 /**
  * The root game state and its reducer.
@@ -45,6 +48,8 @@ export function createNewGameState(seed = randomSeed()) {
     playtimeMs: 0,
     rngState: seed >>> 0,
     stepsSinceEncounter: 0,
+    /** Transient one-liner for the field HUD ("Found 2 Potions!"). */
+    notice: null,
   }
 }
 
@@ -67,6 +72,64 @@ function replaceMember(party, index, member) {
   const next = party.slice()
   next[index] = member
   return next
+}
+
+/** What stepping onto a chest, staircase, boss marker or exit does. */
+function applyTrigger(state, floor, trigger, rng) {
+  switch (trigger.kind) {
+    case 'chest': {
+      const qty = trigger.qty ?? 1
+      const item = getItem(trigger.itemId)
+      return {
+        ...state,
+        inventory: addItem(state.inventory, trigger.itemId, qty),
+        flags: { ...state.flags, [chestFlag(floor, trigger.x, trigger.y)]: true },
+        notice: `Found ${qty > 1 ? `${qty} ` : ''}${item.name}${qty > 1 ? 's' : ''}!`,
+      }
+    }
+
+    case 'link':
+      return {
+        ...state,
+        location: {
+          ...state.location,
+          floorId: trigger.floor,
+          x: trigger.x,
+          y: trigger.y,
+        },
+        stepsSinceEncounter: 0,
+      }
+
+    case 'boss':
+      return {
+        ...state,
+        mode: MODES.BATTLE,
+        notice: trigger.intro ?? null,
+        battle: createBattle({
+          party: state.party,
+          inventory: state.inventory,
+          enemyIds: trigger.enemyIds,
+          seed: rng.int(0, 0xffffffff),
+          canFlee: false,
+          opening: 'normal',
+          returnMode: MODES.DUNGEON,
+          onVictory: {
+            flag: trigger.flag,
+            itemId: trigger.reward?.itemId,
+            notice: trigger.reward?.itemId
+              ? `Obtained the ${getItem(trigger.reward.itemId).name}.`
+              : null,
+          },
+        }),
+      }
+
+    case 'exit':
+      // Phase 5 replaces this with a return to the world map.
+      return { ...state, mode: MODES.MENU, notice: null }
+
+    default:
+      return state
+  }
 }
 
 const handlers = {
@@ -216,17 +279,105 @@ const handlers = {
 
   updateBattle: (state, action) => ({ ...state, battle: action.battle }),
 
+  enterDungeon: (state, action) => {
+    const floor = getFloor(action.dungeonId, action.floorId)
+    return {
+      ...state,
+      mode: MODES.DUNGEON,
+      location: {
+        type: 'dungeon',
+        dungeonId: action.dungeonId,
+        floorId: action.floorId,
+        x: action.x ?? floor.spawn.x,
+        y: action.y ?? floor.spawn.y,
+        facing: action.facing ?? 'down',
+      },
+      stepsSinceEncounter: 0,
+      notice: null,
+    }
+  },
+
+  /**
+   * One step. This is where the dungeon actually happens: collision, the tile
+   * trigger you land on, and the encounter roll all resolve here, in the
+   * reducer, so every one of them is recorded in the save rather than in some
+   * component's state.
+   */
+  move: (state, action) =>
+    withRng(state, (rng) => {
+      if (state.mode !== MODES.DUNGEON || state.location?.type !== 'dungeon') return state
+
+      const floor = floorFor(state.location)
+      const step = stepFrom(floor, state.location, action.direction, state.flags)
+      const facing = { ...state.location, facing: step.facing }
+
+      if (step.blocked) return { ...state, location: facing, notice: null }
+
+      const moved = {
+        ...state,
+        location: { ...facing, x: step.x, y: step.y },
+        stepsSinceEncounter: state.stepsSinceEncounter + 1,
+        notice: null,
+      }
+
+      const trigger = triggerAt(floor, step.x, step.y, state.flags)
+      if (trigger) return applyTrigger(moved, floor, trigger, rng)
+
+      const enemyIds = rollEncounter(
+        getDungeon(state.location.dungeonId).zone,
+        moved.stepsSinceEncounter,
+        rng,
+      )
+      if (!enemyIds) return moved
+
+      return {
+        ...moved,
+        stepsSinceEncounter: 0,
+        mode: MODES.BATTLE,
+        battle: createBattle({
+          party: moved.party,
+          inventory: moved.inventory,
+          enemyIds,
+          seed: rng.int(0, 0xffffffff),
+          returnMode: MODES.DUNGEON,
+        }),
+      }
+    }),
+
+  leaveDungeon: (state) => ({
+    ...state,
+    // Phase 5 replaces this with the world map.
+    mode: MODES.MENU,
+    notice: null,
+  }),
+
+  clearNotice: (state) => (state.notice ? { ...state, notice: null } : state),
+
   /**
    * Fold the finished fight back into the save. A total wipe always wins over
    * whatever screen the caller asked to return to.
    */
   endBattle: (state, action) => {
-    if (!state.battle) return state
-    const { state: next } = applyBattleResult(state, state.battle)
+    const battle = state.battle
+    if (!battle) return state
+    const { state: next } = applyBattleResult(state, battle)
     const wiped = next.party.every((member) => !isActive(member))
+    const won = battle.phase === 'victory'
+    const onVictory = battle.onVictory
     return {
       ...next,
-      mode: wiped ? MODES.GAME_OVER : (action.returnMode ?? MODES.MENU),
+      mode: wiped ? MODES.GAME_OVER : (battle.returnMode ?? action.returnMode ?? MODES.MENU),
+      ...(won && onVictory
+        ? {
+            flags: onVictory.flag
+              ? { ...next.flags, [onVictory.flag]: true }
+              : next.flags,
+            inventory: onVictory.itemId
+              ? addItem(next.inventory, onVictory.itemId, 1)
+              : next.inventory,
+            notice: onVictory.notice ?? null,
+          }
+        : {}),
     }
   },
 

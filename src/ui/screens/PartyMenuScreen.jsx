@@ -7,6 +7,7 @@ import { isKO, xpToNextFor } from '../../engine/character.js'
 import { itemWouldHelp } from '../../engine/effects.js'
 import { describeInventory, equippableFor } from '../../engine/inventory.js'
 import { deriveStats, equippedIn } from '../../engine/stats.js'
+import { MODES } from '../../engine/game.js'
 import { useGame } from '../GameProvider.jsx'
 import MenuList from '../components/MenuList.jsx'
 import PartyRow from '../components/PartyRow.jsx'
@@ -155,9 +156,10 @@ export function PartyMenuScreen() {
       { key: 'magic', label: 'Magic' },
       { key: 'equip', label: 'Equip' },
       { key: 'status', label: 'Status' },
-      // Both of these are scaffolding: Phase 4 reaches battles through real
-      // dungeon encounters, and Phase 5 turns this into "Close".
-      { key: 'testBattle', label: 'Test Battle' },
+      // Scaffolding until Phase 5 puts a world map in front of the dungeon.
+      state.location
+        ? { key: 'close', label: 'Close' }
+        : { key: 'enterDungeon', label: 'Enter the Ember Mine' },
       { key: 'quit', label: 'Quit to Title' },
     ]
 
@@ -171,8 +173,10 @@ export function PartyMenuScreen() {
           ariaLabel="Main menu"
           onSelect={(item) => {
             if (item.key === 'quit') dispatch({ type: 'returnToTitle' })
-            else if (item.key === 'testBattle')
-              dispatch({ type: 'startBattle', enemyIds: ['goblin', 'goblin', 'giantRat'] })
+            else if (item.key === 'close')
+              dispatch({ type: 'setMode', mode: MODES.DUNGEON })
+            else if (item.key === 'enterDungeon')
+              dispatch({ type: 'enterDungeon', dungeonId: 'emberMine', floorId: 'b1' })
             else push({ panel: item.key })
           }}
         />
