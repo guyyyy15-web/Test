@@ -2,7 +2,13 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    # The github-pages environment carries a deployment-branch rule created
+    # when Pages published from this branch directly, and it rejects anything
+    # else. Deploying from the branch the rule already allows avoids needing
+    # that rule changed. If it is ever widened to "All branches", move this
+    # back to `main`.
+    branches: [claude/setup-project-infrastructure-qYvTS]
+  workflow_dispatch:
 
 permissions:
   contents: read
