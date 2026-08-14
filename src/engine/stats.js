@@ -45,7 +45,7 @@ export function deriveStats(character) {
   let evasionBonus = 0
   let critBonus = 0
   const resistances = []
-  const immunities = []
+  const statusImmunities = []
   let weaponElement = null
 
   for (const item of gear) {
@@ -58,8 +58,10 @@ export function deriveStats(character) {
     accuracyBonus += item.accuracy ?? 0
     evasionBonus += item.evasion ?? 0
     critBonus += item.crit ?? 0
+    // `resist` is elemental, `immune` is status -- two different systems that
+    // must not be merged, or a Ribbon would start blocking fire damage.
     if (item.resist) resistances.push(...item.resist)
-    if (item.immune) immunities.push(...item.immune)
+    if (item.immune) statusImmunities.push(...item.immune)
     if (item.slot === 'weapon' && item.element) weaponElement = item.element
   }
 
@@ -81,7 +83,8 @@ export function deriveStats(character) {
     attacks: 1,
     weaponElement,
     resistances,
-    immunities,
+    statusImmunities,
+    immunities: [],
     weaknesses: [],
   }
 }

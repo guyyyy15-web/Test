@@ -80,7 +80,7 @@ export const CLASSES = {
     },
     // Bare hands scale with level, so a Monk with no weapon out-damages one
     // holding an early claw. Buying them a weapon too soon is a classic trap.
-    unarmed: 2.5,
+    unarmed: 1.6,
     school: null,
     spellsByLevel: {},
     promotion: 'master',
@@ -230,7 +230,7 @@ export const PROMOTED_CLASSES = {
     base: { hp: 44, mp: 0, str: 13, agi: 13, vit: 12, int: 5, luk: 9 },
     growth: { hp: 7.2, mp: 0, str: 1.15, agi: 1, vit: 1.05, int: 0.25, luk: 0.65 },
     equip: { weapon: ['claw'], offhand: [], head: ['light'], body: ['light'] },
-    unarmed: 3.2,
+    unarmed: 2.0,
     school: null,
     spellsByLevel: {},
     promotion: null,
