@@ -1,5 +1,7 @@
 import { MODES } from './engine/game.js'
 import { useGame } from './ui/GameProvider.jsx'
+import PartyCreationScreen from './ui/screens/PartyCreationScreen.jsx'
+import PartyMenuScreen from './ui/screens/PartyMenuScreen.jsx'
 import TitleScreen from './ui/screens/TitleScreen.jsx'
 
 /**
@@ -8,14 +10,14 @@ import TitleScreen from './ui/screens/TitleScreen.jsx'
  */
 const SCREENS = {
   [MODES.TITLE]: TitleScreen,
+  [MODES.PARTY_CREATION]: PartyCreationScreen,
+  [MODES.MENU]: PartyMenuScreen,
 }
 
 function Placeholder({ mode }) {
   return (
     <div className="screen screen--center">
-      <p className="u-dim u-center">
-        {mode} screen is not built yet.
-      </p>
+      <p className="u-dim u-center">{mode} screen is not built yet.</p>
     </div>
   )
 }
@@ -25,9 +27,7 @@ export function App() {
   const Screen = SCREENS[state.mode]
 
   return (
-    <div className="app-shell">
-      {Screen ? <Screen /> : <Placeholder mode={state.mode} />}
-    </div>
+    <div className="app-shell">{Screen ? <Screen /> : <Placeholder mode={state.mode} />}</div>
   )
 }
 

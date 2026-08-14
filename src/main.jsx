@@ -5,6 +5,7 @@ import { GameProvider } from './ui/GameProvider.jsx'
 import { InputProvider } from './ui/input/InputContext.jsx'
 import './styles/base.css'
 import './styles/ui.css'
+import './styles/screens.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

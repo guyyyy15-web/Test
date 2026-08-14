@@ -1,0 +1,226 @@
+/* Screen-specific layout: sprites, the two-pane split, party rows, stat grids. */
+
+/* --------------------------------------------------------------- Sprite -- */
+
+.sprite {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--sprite-color, var(--c-border-light));
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--sprite-color, #888) 22%, #0a0e28);
+  color: var(--sprite-color, #fff);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.sprite--sm {
+  width: 2.6em;
+  height: 2em;
+}
+
+.sprite--md {
+  width: 3.2em;
+  height: 2.6em;
+}
+
+.sprite--lg {
+  width: 4.4em;
+  height: 3.6em;
+  font-size: var(--fs-sm);
+}
+
+.sprite--down {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+/* ----------------------------------------------------------- Two panes -- */
+
+/*
+ * Menu on one side, detail on the other. Stacks on a phone, splits on
+ * anything wider -- the one layout rule the whole game leans on.
+ */
+.panes {
+  display: grid;
+  flex: 1;
+  gap: var(--space-2);
+  grid-template-columns: 1fr;
+  min-height: 0;
+}
+
+@media (min-width: 640px) {
+  .panes {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .panes--wide-detail {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------ Party rows -- */
+
+.party-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.party-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.party-row__name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+}
+
+.party-row__class {
+  color: var(--c-text-dim);
+  font-size: var(--fs-xs);
+}
+
+.party-row__vitals {
+  display: grid;
+  gap: 2px;
+  margin-top: 2px;
+  font-size: var(--fs-xs);
+}
+
+.party-row__vital {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.party-row__vital-label {
+  width: 2.2em;
+  color: var(--c-text-dim);
+}
+
+.party-row__vital-value {
+  width: 5.5em;
+  text-align: right;
+}
+
+.party-row__vital .bar {
+  flex: 1;
+}
+
+/* ------------------------------------------------------------ Stat sheet -- */
+
+.stat-grid {
+  display: grid;
+  gap: var(--space-1) var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  font-size: var(--fs-sm);
+}
+
+.stat-grid__row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border-bottom: 1px dotted rgba(147, 160, 214, 0.25);
+}
+
+.stat-grid__label {
+  color: var(--c-text-dim);
+}
+
+.stat-grid__delta {
+  color: var(--c-hp);
+}
+
+.stat-grid__delta--down {
+  color: var(--c-danger);
+}
+
+.class-blurb {
+  margin: 0 0 var(--space-2);
+  color: var(--c-text-dim);
+  font-size: var(--fs-sm);
+}
+
+/* ------------------------------------------------------- Creation screen -- */
+
+.creation__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.creation__title {
+  margin: 0;
+  color: var(--c-accent);
+  font-size: var(--fs-lg);
+  letter-spacing: 0.1em;
+}
+
+.creation__step {
+  color: var(--c-text-dim);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.name-entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.name-entry__row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.name-entry__row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap);
+  padding: 0 var(--space-3);
+  border: 2px solid var(--c-border-light);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #29346f, #141a45);
+  font-size: var(--fs-sm);
+}
+
+.button:disabled {
+  border-color: var(--c-text-disabled);
+  color: var(--c-text-disabled);
+  cursor: default;
+}
+
+/* ------------------------------------------------------------ Menu screen -- */
+
+.menu-screen__gold {
+  color: var(--c-accent);
+  font-size: var(--fs-sm);
+}
+
+.hint-line {
+  color: var(--c-text-disabled);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
