@@ -108,6 +108,16 @@ export function TownScreen() {
     const items = [
       { key: 'inn', label: 'Inn', detail: `${town.inn.price} G`, disabled: state.gold < town.inn.price },
       ...town.shops.map((shop) => ({ key: `shop:${shop.id}`, label: shop.name })),
+      ...(town.shrine && state.flags[town.shrine.requires]
+        ? [
+            {
+              key: 'shrine',
+              label: town.shrine.name,
+              detail: state.flags[town.shrine.flag] ? 'quiet' : 'ready',
+              disabled: Boolean(state.flags[town.shrine.flag]),
+            },
+          ]
+        : []),
       { key: 'talk', label: 'Talk' },
       { key: 'save', label: 'Save' },
       { key: 'party', label: 'Party' },
@@ -122,6 +132,7 @@ export function TownScreen() {
         ariaLabel="Town menu"
         onSelect={(item) => {
           if (item.key === 'inn') dispatch({ type: 'restAtInn' })
+          else if (item.key === 'shrine') dispatch({ type: 'promoteParty' })
           else if (item.key.startsWith('shop:')) {
             setShopId(item.key.slice(5))
             setPanel('shop')

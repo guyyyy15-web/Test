@@ -1,5 +1,10 @@
 import { parseFloor } from '../../engine/world/tilemap.js'
+import { boneReliquary } from './boneReliquary.js'
+import { drownedCauseway } from './drownedCauseway.js'
+import { emberCaldera } from './emberCaldera.js'
 import { emberMine } from './emberMine.js'
+import { stormSpire } from './stormSpire.js'
+import { sunkenChapel } from './sunkenChapel.js'
 
 /**
  * The dungeon registry.
@@ -9,7 +14,14 @@ import { emberMine } from './emberMine.js'
  * a dungeon.
  */
 
-const RAW_DUNGEONS = [emberMine]
+const RAW_DUNGEONS = [
+  emberMine,
+  drownedCauseway,
+  sunkenChapel,
+  stormSpire,
+  boneReliquary,
+  emberCaldera,
+]
 
 function prepare(dungeon) {
   return {

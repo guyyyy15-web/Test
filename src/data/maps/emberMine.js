@@ -55,7 +55,7 @@ export const emberMine = {
         '#.#.....###......#.#',
         '#.################.#',
         '#.#.....###......#.#',
-        '#.#.....###...C..#.#',
+        '#.#.....###...B..#.#',
         '#.#.....###......#.#',
         '#.###.#######.####.#',
         '#<................>#',
@@ -65,7 +65,13 @@ export const emberMine = {
       props: {
         '5,4': { itemId: 'hi-potion', qty: 2 },
         '14,4': { itemId: 'iron-dagger' },
-        '14,8': { itemId: 'bronze-plate' },
+        '14,8': {
+          kind: 'boss',
+          enemyIds: ['goblinChief', 'goblin', 'goblin'],
+          flag: 'goblinChiefDefeated',
+          reward: { itemId: 'bronze-plate' },
+          intro: 'The biggest one in the room stands up, and keeps standing up.',
+        },
         '1,11': { floor: 'b1', x: 17, y: 12 },
         '18,11': { floor: 'b3', x: 10, y: 12 },
       },

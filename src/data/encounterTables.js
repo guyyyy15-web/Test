@@ -43,7 +43,28 @@ export const ENCOUNTER_TABLES = {
       { weight: 3, enemies: ['mudToad'] },
       { weight: 3, enemies: ['sahagin', 'sahagin'] },
       { weight: 2, enemies: ['willOWisp'] },
+      { weight: 3, enemies: ['drownedSailor'] },
+      { weight: 3, enemies: ['marshLurker'] },
       { weight: 1, enemies: ['pirate', 'pirate', 'sahagin'] },
+      { weight: 1, enemies: ['drownedSailor', 'drownedSailor', 'sahagin'] },
+    ],
+  },
+
+  /**
+   * The optional chapel sits a good six levels above the coast it is reached
+   * from, so it gets its own table rather than borrowing one that would make
+   * it a walkover.
+   */
+  chapel: {
+    minSteps: 9,
+    rate: 12,
+    groups: [
+      { weight: 5, enemies: ['deepOne'] },
+      { weight: 4, enemies: ['drownedSailor', 'drownedSailor'] },
+      { weight: 3, enemies: ['willOWisp', 'willOWisp'] },
+      { weight: 3, enemies: ['deepOne', 'marshLurker'] },
+      { weight: 2, enemies: ['wraith'] },
+      { weight: 1, enemies: ['deepOne', 'deepOne', 'drownedSailor'] },
     ],
   },
 
@@ -56,7 +77,10 @@ export const ENCOUNTER_TABLES = {
       { weight: 3, enemies: ['stormElemental'] },
       { weight: 3, enemies: ['harpy', 'harpy'] },
       { weight: 2, enemies: ['wyvern'] },
+      { weight: 4, enemies: ['thunderHawk'] },
+      { weight: 3, enemies: ['frostWisp'] },
       { weight: 1, enemies: ['gargoyle', 'stormElemental'] },
+      { weight: 1, enemies: ['thunderHawk', 'thunderHawk', 'harpy'] },
     ],
   },
 
@@ -69,7 +93,10 @@ export const ENCOUNTER_TABLES = {
       { weight: 3, enemies: ['boneKnight'] },
       { weight: 3, enemies: ['ghoul', 'ghoul'] },
       { weight: 2, enemies: ['lichAcolyte'] },
+      { weight: 4, enemies: ['graveMoth'] },
+      { weight: 3, enemies: ['boneHound', 'boneHound'] },
       { weight: 1, enemies: ['boneKnight', 'wraith'] },
+      { weight: 1, enemies: ['graveMoth', 'graveMoth', 'boneHound'] },
     ],
   },
 
@@ -81,7 +108,10 @@ export const ENCOUNTER_TABLES = {
       { weight: 4, enemies: ['magmaGolem'] },
       { weight: 4, enemies: ['shade'] },
       { weight: 3, enemies: ['dreadKnight'] },
+      { weight: 4, enemies: ['cinderImp'] },
+      { weight: 3, enemies: ['ashWraith'] },
       { weight: 2, enemies: ['fireDrake', 'shade'] },
+      { weight: 2, enemies: ['cinderImp', 'cinderImp', 'ashWraith'] },
       { weight: 1, enemies: ['dreadKnight', 'magmaGolem'] },
     ],
   },

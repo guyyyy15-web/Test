@@ -2,6 +2,7 @@ import { MODES } from './engine/game.js'
 import { useGame } from './ui/GameProvider.jsx'
 import BattleScreen from './ui/screens/BattleScreen.jsx'
 import DungeonScreen from './ui/screens/DungeonScreen.jsx'
+import EndingScreen from './ui/screens/EndingScreen.jsx'
 import GameOverScreen from './ui/screens/GameOverScreen.jsx'
 import PartyCreationScreen from './ui/screens/PartyCreationScreen.jsx'
 import PartyMenuScreen from './ui/screens/PartyMenuScreen.jsx'
@@ -22,6 +23,7 @@ const SCREENS = {
   [MODES.DUNGEON]: DungeonScreen,
   [MODES.WORLD]: WorldMapScreen,
   [MODES.TOWN]: TownScreen,
+  [MODES.ENDING]: EndingScreen,
 }
 
 function Placeholder({ mode }) {

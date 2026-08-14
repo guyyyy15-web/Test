@@ -149,6 +149,170 @@ export const TOWNS = {
       },
     ],
   },
+  highreach: {
+    id: 'highreach',
+    name: 'Highreach',
+    requires: 'tideSerpentDefeated',
+    blurb:
+      'A monastery town on a shelf of rock, above the weather and most of the arguments.',
+    inn: {
+      price: 140,
+      text: 'A cell, a blanket, and a bell at dawn you are welcome to ignore.',
+    },
+    /** The class-change shrine. One-time, and the reason to come up here. */
+    shrine: {
+      requires: 'tideSerpentDefeated',
+      flag: 'promoted',
+      name: 'The Standing Stones',
+      offer:
+        'The stones have been waiting for someone carrying two of the four. Step between them.',
+      done: 'The stones are quiet now. Whatever they had, you are carrying it.',
+    },
+    shops: [
+      {
+        id: 'provisions',
+        name: 'Monastery Stores',
+        greeting: 'Take what you need. Leave what you can.',
+        stock: ['hi-potion', 'ether', 'remedy', 'phoenix-down', 'mega-potion', 'tent'],
+      },
+      {
+        id: 'smithy',
+        name: 'Highreach Forge',
+        greeting: 'Silver holds an edge against things that should not have one.',
+        stock: [
+          'silver-sword',
+          'assassin-dagger',
+          'great-axe',
+          'dragon-lance',
+          'elven-bow',
+          'dragon-claw',
+          'war-hammer',
+        ],
+      },
+      {
+        id: 'armory',
+        name: 'Highreach Armory',
+        greeting: 'Mythril. Light enough to climb in, heavy enough to matter.',
+        stock: [
+          'mythril-plate',
+          'mythril-shield',
+          'mythril-helm',
+          'mage-robe',
+          'guard-charm',
+          'lucky-coin',
+          'ember-charm',
+          'frost-charm',
+        ],
+      },
+    ],
+    npcs: [
+      {
+        id: 'abbot',
+        name: 'The Abbot',
+        lines: [
+          'Four stones. Four keepers. Each one put somewhere nobody sensible would go.',
+          'That was the plan. It assumed nobody would be that determined.',
+        ],
+      },
+      {
+        id: 'watcher',
+        name: 'A watcher',
+        lines: ['The spire has been lit for eleven nights. Nothing lit it.'],
+      },
+      {
+        id: 'abbot-after',
+        name: 'The Abbot',
+        requires: 'promoted',
+        lines: ['You walk differently. Good. You will need to.'],
+      },
+    ],
+  },
+
+  ashvale: {
+    id: 'ashvale',
+    name: 'Ashvale',
+    requires: 'stormLordDefeated',
+    blurb: 'A grey town downwind of the caldera. Everyone here is packed to leave.',
+    inn: {
+      price: 280,
+      text: 'The innkeeper takes your coin and does not ask how long you are staying.',
+    },
+    shops: [
+      {
+        id: 'provisions',
+        name: 'Last Provisions',
+        greeting: 'Elixirs are dear. So is coming back.',
+        stock: ['hi-potion', 'mega-potion', 'ether', 'remedy', 'phoenix-down', 'elixir', 'tent'],
+      },
+      {
+        id: 'smithy',
+        name: 'Ashvale Forge',
+        greeting: 'Fire-forged. Seemed appropriate.',
+        stock: ['flame-sword', 'venom-fang', 'dragon-claw', 'sage-staff', 'arcane-rod'],
+      },
+      {
+        id: 'armory',
+        name: 'Ashvale Armory',
+        greeting: 'Dragon plate. Do not ask which dragon.',
+        stock: ['dragon-plate', 'aegis', 'mythril-helm', 'ward-ring', 'power-band', 'sage-pendant'],
+      },
+    ],
+    npcs: [
+      {
+        id: 'refugee',
+        name: 'A refugee',
+        lines: ['The reliquary opened by itself. Things walked out of it in order.'],
+      },
+      {
+        id: 'cartographer',
+        name: 'Cartographer',
+        lines: [
+          'Four stones set back into one crown. I have drawn what happens next twice and burned both.',
+        ],
+      },
+    ],
+  },
+
+  lastCamp: {
+    id: 'lastCamp',
+    name: 'The Last Camp',
+    requires: 'boneTyrantDefeated',
+    blurb:
+      'Tents on hot stone at the caldera lip. Nobody here expects to be here long.',
+    inn: {
+      price: 400,
+      text: 'You sleep on warm rock under a sky the colour of a bruise, and it is enough.',
+    },
+    shops: [
+      {
+        id: 'provisions',
+        name: 'The Quartermaster',
+        greeting: 'Everything I have. There is no point saving it.',
+        stock: ['mega-potion', 'elixir', 'ether', 'remedy', 'phoenix-down', 'tent'],
+      },
+      {
+        id: 'armory',
+        name: 'The Armourer',
+        greeting: 'Take the ribbon if you can afford it. It is the only thing that helps.',
+        stock: ['crown-blade', 'dragon-plate', 'aegis', 'ribbon', 'ward-ring', 'lucky-coin'],
+      },
+    ],
+    npcs: [
+      {
+        id: 'captain',
+        name: 'The Captain',
+        lines: [
+          'We hold the lip. We do not go down. That was the order and it is a good one.',
+          'You are going down anyway. I will not pretend to stop you.',
+        ],
+      },
+      {
+        id: 'scout',
+        name: 'A scout',
+        lines: ['Four floors. It gets warmer. Then it gets quiet, and that is worse.'],
+      },
+    ],
+  },
 }
 
 export function getTown(townId) {

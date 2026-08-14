@@ -4,7 +4,7 @@ import { floorFor, getDungeon, getFloor } from '../data/maps/index.js'
 import { getTown } from '../data/towns/index.js'
 import { STARTING_NODE, getNode, isUnlocked } from '../data/world.js'
 import { getSpell, isFieldSpell } from '../data/spells.js'
-import { createCharacter, isActive, restore } from './character.js'
+import { createCharacter, isActive, promote, restore } from './character.js'
 import { applyBattleResult, createBattle } from './battle/battle.js'
 import { applyEffect, fieldEffectForSpell } from './effects.js'
 import { addItem, buy, equipItem, removeItem, sell, unequipSlot } from './inventory.js'
@@ -130,6 +130,7 @@ function applyTrigger(state, floor, trigger, rng) {
             notice: trigger.reward?.itemId
               ? `Obtained the ${getItem(trigger.reward.itemId).name}.`
               : null,
+            mode: trigger.endsGame ? MODES.ENDING : null,
           },
         }),
       }
@@ -395,6 +396,17 @@ const handlers = {
     }
   },
 
+  /** The one-time class change at the Highreach shrine. */
+  promoteParty: (state) => {
+    if (state.flags.promoted) return state
+    return {
+      ...state,
+      party: state.party.map(promote),
+      flags: { ...state.flags, promoted: true },
+      notice: 'The stones go dark. Everyone is standing a little differently.',
+    }
+  },
+
   /** The inn: the classic full restore, including the dead. */
   restAtInn: (state) => {
     const town = getTown(state.location?.townId)
@@ -422,7 +434,9 @@ const handlers = {
     const onVictory = battle.onVictory
     return {
       ...next,
-      mode: wiped ? MODES.GAME_OVER : (battle.returnMode ?? action.returnMode ?? MODES.WORLD),
+      mode: wiped
+        ? MODES.GAME_OVER
+        : (won && onVictory?.mode) || battle.returnMode || action.returnMode || MODES.WORLD,
       ...(won && onVictory
         ? {
             flags: onVictory.flag
