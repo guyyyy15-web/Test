@@ -6,6 +6,7 @@ import { InputProvider } from './ui/input/InputContext.jsx'
 import './styles/base.css'
 import './styles/ui.css'
 import './styles/screens.css'
+import './styles/battle.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

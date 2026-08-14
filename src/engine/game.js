@@ -1,7 +1,8 @@
 import { PARTY_SIZE, STARTING_EQUIPMENT, STARTING_GOLD, STARTING_INVENTORY } from '../data/progression.js'
 import { getItem } from '../data/items.js'
 import { getSpell, isFieldSpell } from '../data/spells.js'
-import { createCharacter } from './character.js'
+import { createCharacter, isActive } from './character.js'
+import { applyBattleResult, createBattle } from './battle/battle.js'
 import { applyEffect, fieldEffectForSpell } from './effects.js'
 import { addItem, buy, equipItem, removeItem, sell, unequipSlot } from './inventory.js'
 import { makeRng, randomSeed } from './rng.js'
@@ -197,6 +198,37 @@ const handlers = {
       const spent = { ...party[casterIndex], mp: party[casterIndex].mp - spell.mp }
       return { ...state, party: replaceMember(party, casterIndex, spent) }
     }),
+
+  /** Seed the fight from the save's generator so an encounter is replayable. */
+  startBattle: (state, action) =>
+    withRng(state, (rng) => ({
+      ...state,
+      mode: MODES.BATTLE,
+      battle: createBattle({
+        party: state.party,
+        inventory: state.inventory,
+        enemyIds: action.enemyIds,
+        seed: rng.int(0, 0xffffffff),
+        canFlee: action.canFlee ?? true,
+        background: action.background,
+      }),
+    })),
+
+  updateBattle: (state, action) => ({ ...state, battle: action.battle }),
+
+  /**
+   * Fold the finished fight back into the save. A total wipe always wins over
+   * whatever screen the caller asked to return to.
+   */
+  endBattle: (state, action) => {
+    if (!state.battle) return state
+    const { state: next } = applyBattleResult(state, state.battle)
+    const wiped = next.party.every((member) => !isActive(member))
+    return {
+      ...next,
+      mode: wiped ? MODES.GAME_OVER : (action.returnMode ?? MODES.MENU),
+    }
+  },
 
   addItem: (state, action) => ({
     ...state,

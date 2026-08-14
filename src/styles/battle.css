@@ -1,0 +1,230 @@
+/* Battle screen: enemy field on top, message window, party and commands below. */
+
+.battle {
+  gap: var(--space-2);
+}
+
+.battle__enemies {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 0;
+  padding: var(--space-2);
+  border: 2px solid var(--c-border-dark);
+  border-radius: 3px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(80, 100, 190, 0.22), transparent 60%),
+    linear-gradient(180deg, #0a0f2e, #04050f);
+  overflow-y: auto;
+}
+
+.battle__log {
+  flex: none;
+  min-height: 4.5em;
+}
+
+.battle__bottom {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@media (min-width: 700px) {
+  .battle__bottom {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .battle__party {
+    flex: 1;
+  }
+
+  .battle__commands {
+    width: 240px;
+  }
+}
+
+.battle__party {
+  display: grid;
+  gap: var(--space-1);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 700px) {
+  .battle__party {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ------------------------------------------------------------ Combatant -- */
+
+.combatant {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 120px;
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid transparent;
+  border-radius: 3px;
+  background: rgba(10, 16, 48, 0.6);
+  text-align: left;
+}
+
+/* On the battlefield the cards size to their content instead of stretching
+   across a desktop-width row. */
+.battle__enemies .combatant {
+  width: auto;
+  min-width: 190px;
+  max-width: 300px;
+}
+
+.combatant--pickable {
+  cursor: pointer;
+}
+
+.combatant--targeted {
+  border-color: var(--c-accent);
+  background: rgba(255, 210, 63, 0.12);
+}
+
+.combatant--down {
+  opacity: 0.45;
+}
+
+.combatant__sprite {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 3.4em;
+  height: 2.8em;
+  border: 2px solid var(--sprite-color, #888);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--sprite-color, #888) 24%, #070b22);
+  color: var(--sprite-color, #fff);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.combatant__sprite--damage {
+  animation: shake 260ms ease-out;
+}
+
+.combatant__sprite--immune,
+.combatant__sprite--miss {
+  animation: nudge 240ms ease-out;
+}
+
+.combatant__sprite--heal {
+  animation: glow 420ms ease-out;
+}
+
+.combatant__sprite--cast {
+  animation: glow 380ms ease-out;
+}
+
+.combatant__sprite--down {
+  opacity: 0.35;
+  filter: grayscale(1);
+  animation: none;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  45% {
+    transform: translateX(5px);
+  }
+  70% {
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 0 rgba(88, 214, 141, 0);
+  }
+  40% {
+    box-shadow: 0 0 14px rgba(88, 214, 141, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(88, 214, 141, 0);
+  }
+}
+
+.combatant__body {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.combatant__name {
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.combatant__statuses {
+  color: var(--c-danger);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+}
+
+/* Floating damage/heal numbers over the sprite. */
+.combatant__float {
+  position: absolute;
+  top: 0;
+  left: 2.2em;
+  color: var(--c-text);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  pointer-events: none;
+  text-shadow: 0 2px 0 #000;
+  animation: float-up 700ms ease-out forwards;
+}
+
+.combatant__float--damage {
+  color: #ff6b5a;
+}
+
+.combatant__float--heal {
+  color: var(--c-hp);
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px);
+  }
+}

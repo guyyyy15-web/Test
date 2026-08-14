@@ -155,7 +155,9 @@ export function PartyMenuScreen() {
       { key: 'magic', label: 'Magic' },
       { key: 'equip', label: 'Equip' },
       { key: 'status', label: 'Status' },
-      // Phase 5 replaces this with "Close", returning to the field.
+      // Both of these are scaffolding: Phase 4 reaches battles through real
+      // dungeon encounters, and Phase 5 turns this into "Close".
+      { key: 'testBattle', label: 'Test Battle' },
       { key: 'quit', label: 'Quit to Title' },
     ]
 
@@ -169,6 +171,8 @@ export function PartyMenuScreen() {
           ariaLabel="Main menu"
           onSelect={(item) => {
             if (item.key === 'quit') dispatch({ type: 'returnToTitle' })
+            else if (item.key === 'testBattle')
+              dispatch({ type: 'startBattle', enemyIds: ['goblin', 'goblin', 'giantRat'] })
             else push({ panel: item.key })
           }}
         />
