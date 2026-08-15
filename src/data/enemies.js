@@ -42,7 +42,7 @@ export const ENEMIES = {
   goblin: enemy('goblin', 'Goblin', 'GOB', '#7cb342', {
     level: 2,
     hp: 68,
-    attack: 20,
+    attack: 17,
     defense: 5,
     agi: 6,
     evasion: 2,
@@ -53,7 +53,7 @@ export const ENEMIES = {
   giantRat: enemy('giantRat', 'Giant Rat', 'RAT', '#8d6e63', {
     level: 1,
     hp: 42,
-    attack: 15,
+    attack: 13,
     defense: 2,
     agi: 9,
     evasion: 5,
@@ -67,7 +67,7 @@ export const ENEMIES = {
   wildBoar: enemy('wildBoar', 'Wild Boar', 'BOA', '#a1887f', {
     level: 3,
     hp: 99,
-    attack: 24,
+    attack: 20,
     defense: 6,
     agi: 5,
     xp: 20,
@@ -76,7 +76,7 @@ export const ENEMIES = {
   wasp: enemy('wasp', 'Blade Wasp', 'WSP', '#fdd835', {
     level: 2,
     hp: 36,
-    attack: 18,
+    attack: 15,
     defense: 2,
     agi: 15,
     evasion: 12,
@@ -92,7 +92,7 @@ export const ENEMIES = {
   kobold: enemy('kobold', 'Kobold', 'KOB', '#6d4c41', {
     level: 5,
     hp: 120,
-    attack: 33,
+    attack: 28,
     defense: 9,
     agi: 8,
     xp: 36,
@@ -102,7 +102,7 @@ export const ENEMIES = {
   caveBat: enemy('caveBat', 'Cave Bat', 'BAT', '#5c6bc0', {
     level: 4,
     hp: 73,
-    attack: 27,
+    attack: 23,
     defense: 4,
     agi: 17,
     evasion: 14,
@@ -116,7 +116,7 @@ export const ENEMIES = {
   rockCrab: enemy('rockCrab', 'Rock Crab', 'CRB', '#78909c', {
     level: 6,
     hp: 156,
-    attack: 34,
+    attack: 29,
     defense: 18,
     agi: 4,
     xp: 45,
@@ -127,7 +127,7 @@ export const ENEMIES = {
   mineSlime: enemy('mineSlime', 'Mine Slime', 'SLM', '#26a69a', {
     level: 5,
     hp: 135,
-    attack: 28,
+    attack: 24,
     defense: 7,
     magicDefense: 12,
     agi: 5,
@@ -140,7 +140,7 @@ export const ENEMIES = {
   skeleton: enemy('skeleton', 'Skeleton', 'SKL', '#eceff1', {
     level: 6,
     hp: 114,
-    attack: 37,
+    attack: 31,
     defense: 11,
     agi: 7,
     xp: 48,
@@ -155,7 +155,7 @@ export const ENEMIES = {
   mudToad: enemy('mudToad', 'Mud Toad', 'TOD', '#689f38', {
     level: 9,
     hp: 218,
-    attack: 56,
+    attack: 48,
     defense: 14,
     agi: 6,
     xp: 87,
@@ -169,7 +169,7 @@ export const ENEMIES = {
   pirate: enemy('pirate', 'Pirate', 'PIR', '#d84315', {
     level: 10,
     hp: 198,
-    attack: 56,
+    attack: 48,
     defense: 16,
     agi: 12,
     critChance: 6,
@@ -180,9 +180,9 @@ export const ENEMIES = {
   sahagin: enemy('sahagin', 'Sahagin', 'SAH', '#00838f', {
     level: 11,
     hp: 239,
-    attack: 60,
+    attack: 51,
     defense: 18,
-    magicAttack: 17,
+    magicAttack: 15,
     mp: 24,
     agi: 11,
     xp: 117,
@@ -197,9 +197,9 @@ export const ENEMIES = {
   willOWisp: enemy('willOWisp', 'Will-o-Wisp', 'WSP', '#4dd0e1', {
     level: 12,
     hp: 161,
-    attack: 52,
+    attack: 44,
     defense: 10,
-    magicAttack: 37,
+    magicAttack: 33,
     magicDefense: 22,
     mp: 40,
     agi: 16,
@@ -219,7 +219,7 @@ export const ENEMIES = {
   harpy: enemy('harpy', 'Harpy', 'HRP', '#ba68c8', {
     level: 15,
     hp: 270,
-    attack: 72,
+    attack: 61,
     defense: 20,
     agi: 20,
     evasion: 15,
@@ -231,7 +231,7 @@ export const ENEMIES = {
   gargoyle: enemy('gargoyle', 'Gargoyle', 'GAR', '#90a4ae', {
     level: 16,
     hp: 390,
-    attack: 95,
+    attack: 81,
     defense: 34,
     magicDefense: 18,
     agi: 8,
@@ -243,9 +243,9 @@ export const ENEMIES = {
   stormElemental: enemy('stormElemental', 'Storm Elemental', 'ELM', '#4fc3f7', {
     level: 18,
     hp: 333,
-    attack: 66,
+    attack: 56,
     defense: 22,
-    magicAttack: 41,
+    magicAttack: 36,
     magicDefense: 30,
     mp: 70,
     agi: 22,
@@ -262,7 +262,7 @@ export const ENEMIES = {
   wyvern: enemy('wyvern', 'Wyvern', 'WYV', '#7cb342', {
     level: 20,
     hp: 546,
-    attack: 93,
+    attack: 79,
     defense: 30,
     agi: 18,
     xp: 375,
@@ -276,7 +276,7 @@ export const ENEMIES = {
   ghoul: enemy('ghoul', 'Ghoul', 'GHL', '#8bc34a', {
     level: 21,
     hp: 468,
-    attack: 95,
+    attack: 81,
     defense: 26,
     agi: 12,
     xp: 390,
@@ -293,9 +293,9 @@ export const ENEMIES = {
   wraith: enemy('wraith', 'Wraith', 'WRT', '#9575cd', {
     level: 23,
     hp: 416,
-    attack: 83,
+    attack: 71,
     defense: 22,
-    magicAttack: 53,
+    magicAttack: 47,
     magicDefense: 38,
     mp: 90,
     agi: 20,
@@ -315,7 +315,7 @@ export const ENEMIES = {
   boneKnight: enemy('boneKnight', 'Bone Knight', 'BNK', '#cfd8dc', {
     level: 25,
     hp: 676,
-    attack: 112,
+    attack: 95,
     defense: 42,
     agi: 14,
     xp: 540,
@@ -329,9 +329,9 @@ export const ENEMIES = {
   lichAcolyte: enemy('lichAcolyte', 'Lich Acolyte', 'LCH', '#7e57c2', {
     level: 27,
     hp: 572,
-    attack: 76,
+    attack: 65,
     defense: 28,
-    magicAttack: 70,
+    magicAttack: 62,
     magicDefense: 46,
     mp: 140,
     agi: 17,
@@ -352,9 +352,9 @@ export const ENEMIES = {
   fireDrake: enemy('fireDrake', 'Fire Drake', 'DRK', '#e64a19', {
     level: 30,
     hp: 884,
-    attack: 135,
+    attack: 115,
     defense: 44,
-    magicAttack: 60,
+    magicAttack: 53,
     mp: 100,
     agi: 19,
     xp: 840,
@@ -369,7 +369,7 @@ export const ENEMIES = {
   magmaGolem: enemy('magmaGolem', 'Magma Golem', 'GLM', '#ff7043', {
     level: 32,
     hp: 1196,
-    attack: 149,
+    attack: 127,
     defense: 60,
     magicDefense: 30,
     agi: 6,
@@ -382,7 +382,7 @@ export const ENEMIES = {
   dreadKnight: enemy('dreadKnight', 'Dread Knight', 'DRD', '#455a64', {
     level: 34,
     hp: 1040,
-    attack: 159,
+    attack: 135,
     defense: 52,
     magicDefense: 34,
     agi: 22,
@@ -397,9 +397,9 @@ export const ENEMIES = {
   shade: enemy('shade', 'Shade', 'SHD', '#5e35b1', {
     level: 33,
     hp: 780,
-    attack: 122,
+    attack: 104,
     defense: 36,
-    magicAttack: 84,
+    magicAttack: 74,
     magicDefense: 52,
     mp: 180,
     agi: 26,
@@ -419,7 +419,7 @@ export const ENEMIES = {
   drownedSailor: enemy('drownedSailor', 'Drowned Sailor', 'DRW', '#4e7a86', {
     level: 10,
     hp: 186,
-    attack: 73,
+    attack: 62,
     defense: 15,
     agi: 8,
     xp: 92,
@@ -432,7 +432,7 @@ export const ENEMIES = {
   marshLurker: enemy('marshLurker', 'Marsh Lurker', 'LRK', '#4b6b3a', {
     level: 12,
     hp: 232,
-    attack: 59,
+    attack: 50,
     defense: 20,
     agi: 9,
     xp: 122,
@@ -447,9 +447,9 @@ export const ENEMIES = {
   deepOne: enemy('deepOne', 'Deep One', 'DPO', '#2f6f7a', {
     level: 14,
     hp: 268,
-    attack: 63,
+    attack: 54,
     defense: 22,
-    magicAttack: 36,
+    magicAttack: 32,
     magicDefense: 26,
     mp: 60,
     agi: 13,
@@ -467,7 +467,7 @@ export const ENEMIES = {
   thunderHawk: enemy('thunderHawk', 'Thunder Hawk', 'HWK', '#7fb2f0', {
     level: 17,
     hp: 246,
-    attack: 65,
+    attack: 55,
     defense: 18,
     agi: 24,
     evasion: 18,
@@ -480,9 +480,9 @@ export const ENEMIES = {
   frostWisp: enemy('frostWisp', 'Frost Wisp', 'FRW', '#a5e5f5', {
     level: 19,
     hp: 214,
-    attack: 54,
+    attack: 46,
     defense: 16,
-    magicAttack: 50,
+    magicAttack: 44,
     magicDefense: 36,
     mp: 90,
     agi: 21,
@@ -501,7 +501,7 @@ export const ENEMIES = {
   graveMoth: enemy('graveMoth', 'Grave Moth', 'MTH', '#b0a0c8', {
     level: 22,
     hp: 300,
-    attack: 76,
+    attack: 65,
     defense: 22,
     agi: 23,
     evasion: 20,
@@ -517,7 +517,7 @@ export const ENEMIES = {
   boneHound: enemy('boneHound', 'Bone Hound', 'HND', '#d8d0c0', {
     level: 24,
     hp: 340,
-    attack: 93,
+    attack: 79,
     defense: 30,
     agi: 21,
     attacks: 2,
@@ -532,9 +532,9 @@ export const ENEMIES = {
   cinderImp: enemy('cinderImp', 'Cinder Imp', 'IMP', '#ff9a56', {
     level: 30,
     hp: 380,
-    attack: 102,
+    attack: 87,
     defense: 38,
-    magicAttack: 65,
+    magicAttack: 57,
     magicDefense: 34,
     mp: 110,
     agi: 24,
@@ -552,9 +552,9 @@ export const ENEMIES = {
   ashWraith: enemy('ashWraith', 'Ash Wraith', 'ASH', '#9a8c86', {
     level: 33,
     hp: 420,
-    attack: 107,
+    attack: 91,
     defense: 40,
-    magicAttack: 91,
+    magicAttack: 80,
     magicDefense: 50,
     mp: 190,
     agi: 23,

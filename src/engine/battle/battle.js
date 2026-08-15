@@ -269,12 +269,18 @@ export function applyBattleResult(state, battle) {
   let gold = state.gold
 
   if (battle.phase === BATTLE_PHASES.VICTORY && battle.rewards) {
-    const survivors = party.filter(isActive).length
-    const share = survivors > 0 ? Math.floor(battle.rewards.xp / survivors) : 0
+    /*
+     * Every survivor earns the full award rather than a quarter share.
+     * Splitting it between four heroes is the FF1 rule, and it makes a full
+     * party level four times slower than a solo one -- which reads in play as
+     * "nothing is happening". Only the fallen miss out, which is what keeps
+     * reviving someone before the last enemy drops worth doing.
+     */
+    const award = battle.rewards.xp
 
     party = party.map((member, index) => {
       if (!isActive(member)) return member
-      const result = gainXp(member, share)
+      const result = gainXp(member, award)
       if (result.levelsGained > 0) {
         levelUps.push({
           characterIndex: index,

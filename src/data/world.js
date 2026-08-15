@@ -23,6 +23,7 @@ export const WORLD_NODES = {
     kind: 'dungeon',
     dungeonId: 'emberMine',
     floorId: 'b1',
+    arrival: 1,
     recommended: 5,
     x: 24,
     y: 62,
@@ -46,6 +47,7 @@ export const WORLD_NODES = {
     kind: 'dungeon',
     dungeonId: 'drownedCauseway',
     floorId: 'f1',
+    arrival: 9,
     recommended: 14,
     requires: 'mineWardenDefeated',
     x: 48,
@@ -59,6 +61,7 @@ export const WORLD_NODES = {
     kind: 'dungeon',
     dungeonId: 'sunkenChapel',
     floorId: 'f1',
+    arrival: 17,
     recommended: 18,
     requires: 'tideSerpentDefeated',
     optional: true,
@@ -84,6 +87,7 @@ export const WORLD_NODES = {
     kind: 'dungeon',
     dungeonId: 'stormSpire',
     floorId: 'f1',
+    arrival: 18,
     recommended: 24,
     requires: 'tideSerpentDefeated',
     x: 72,
@@ -108,6 +112,7 @@ export const WORLD_NODES = {
     kind: 'dungeon',
     dungeonId: 'boneReliquary',
     floorId: 'f1',
+    arrival: 24,
     recommended: 28,
     requires: 'stormLordDefeated',
     x: 42,
@@ -132,6 +137,7 @@ export const WORLD_NODES = {
     kind: 'dungeon',
     dungeonId: 'emberCaldera',
     floorId: 'f1',
+    arrival: 34,
     recommended: 36,
     requires: 'boneTyrantDefeated',
     x: 12,
@@ -140,6 +146,11 @@ export const WORLD_NODES = {
   },
 }
 
+/**
+ * `arrival` is the level the party realistically reaches this dungeon at;
+ * `recommended` is roughly where they leave it. Both are simulated -- testing
+ * only the recommended level is how the first dungeon shipped unbeatable.
+ */
 export const STARTING_NODE = 'emberfall'
 
 /** The four stones, and the flag each one is proof of. */

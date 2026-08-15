@@ -17,6 +17,9 @@ export const emberMine = {
     {
       id: 'b1',
       name: 'Ember Mine 1F',
+      // The party arrives here at level 1; the deeper floors use the harder
+      // 'mine' table.
+      zone: 'mineUpper',
       spawn: { x: 1, y: 1 },
       tiles: [
         '####################',

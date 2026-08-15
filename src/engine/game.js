@@ -339,8 +339,9 @@ const handlers = {
       const trigger = triggerAt(floor, step.x, step.y, state.flags)
       if (trigger) return applyTrigger(moved, floor, trigger, rng)
 
+      // A floor may name its own zone; dungeons ramp from front to back.
       const enemyIds = rollEncounter(
-        getDungeon(state.location.dungeonId).zone,
+        floor.zone ?? getDungeon(state.location.dungeonId).zone,
         moved.stepsSinceEncounter,
         rng,
       )

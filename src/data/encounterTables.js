@@ -20,17 +20,37 @@ export const ENCOUNTER_TABLES = {
     ],
   },
 
+  /**
+   * The Ember Mine's upper floor. The party reaches it at level 1 -- Emberfall
+   * to the mine is the only road in the game, so there is nowhere to grind
+   * first and this table has to be beatable straight out of character
+   * creation.
+   */
+  mineUpper: {
+    minSteps: 10,
+    rate: 9,
+    groups: [
+      { weight: 6, enemies: ['giantRat', 'giantRat'] },
+      { weight: 5, enemies: ['goblin'] },
+      { weight: 4, enemies: ['wasp', 'wasp'] },
+      { weight: 3, enemies: ['goblin', 'giantRat'] },
+      { weight: 2, enemies: ['caveBat'] },
+      { weight: 1, enemies: ['wildBoar'] },
+    ],
+  },
+
   mine: {
     minSteps: 10,
     rate: 9,
     groups: [
-      { weight: 5, enemies: ['kobold', 'kobold'] },
-      { weight: 4, enemies: ['caveBat', 'caveBat'] },
-      { weight: 4, enemies: ['mineSlime', 'mineSlime'] },
+      { weight: 5, enemies: ['goblin', 'goblin'] },
+      { weight: 5, enemies: ['caveBat', 'caveBat'] },
+      { weight: 4, enemies: ['kobold'] },
+      { weight: 4, enemies: ['mineSlime'] },
       { weight: 3, enemies: ['kobold', 'caveBat'] },
-      { weight: 3, enemies: ['skeleton', 'skeleton'] },
+      { weight: 3, enemies: ['skeleton'] },
       { weight: 2, enemies: ['rockCrab'] },
-      { weight: 1, enemies: ['skeleton', 'mineSlime'] },
+      { weight: 2, enemies: ['skeleton', 'caveBat'] },
     ],
   },
 
@@ -79,7 +99,7 @@ export const ENCOUNTER_TABLES = {
       { weight: 2, enemies: ['wyvern'] },
       { weight: 4, enemies: ['thunderHawk', 'thunderHawk'] },
       { weight: 3, enemies: ['frostWisp', 'frostWisp'] },
-      { weight: 1, enemies: ['gargoyle', 'stormElemental'] },
+      { weight: 1, enemies: ['gargoyle', 'harpy'] },
       { weight: 1, enemies: ['thunderHawk', 'harpy'] },
     ],
   },
@@ -111,8 +131,7 @@ export const ENCOUNTER_TABLES = {
       { weight: 4, enemies: ['cinderImp', 'cinderImp'] },
       { weight: 3, enemies: ['ashWraith', 'ashWraith'] },
       { weight: 2, enemies: ['fireDrake', 'shade'] },
-      { weight: 2, enemies: ['cinderImp', 'cinderImp', 'ashWraith'] },
-      { weight: 1, enemies: ['dreadKnight', 'magmaGolem'] },
+      { weight: 2, enemies: ['cinderImp', 'cinderImp'] },
     ],
   },
 }

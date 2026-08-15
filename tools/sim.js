@@ -14,10 +14,11 @@
  */
 
 import { createCharacter, isActive } from '../src/engine/character.js'
-import { STARTING_EQUIPMENT } from '../src/data/progression.js'
+import { buildReferenceParty, stockFor } from '../src/data/referenceParty.js'
 import { getSpell } from '../src/data/spells.js'
 import { BATTLE_PHASES, createBattle, resolveRound } from '../src/engine/battle/battle.js'
 import { effectiveStats, isDown } from '../src/engine/battle/combatant.js'
+import { chooseAutoCommands } from '../src/engine/battle/autoBattle.js'
 import { getEnemy } from '../src/data/enemies.js'
 import { WORLD_NODES } from '../src/data/world.js'
 import { DUNGEONS } from '../src/data/maps/index.js'
@@ -65,189 +66,8 @@ function parseArgs(argv) {
   return args
 }
 
-/**
- * What the party is plausibly wearing at each point in the story.
- *
- * Simulating a level 40 party in the rusted sword they started with produces
- * numbers that describe a game nobody will play. Gear is half the power curve,
- * so the model has to include it.
- */
-const GEAR_TIERS = [
-  { level: 1, items: ['rusted-sword', 'knife', 'oak-staff', 'ash-rod', 'leather-armor', 'cloth-robe'] },
-  {
-    level: 6,
-    items: [
-      'bronze-sword', 'bronze-dagger', 'hand-axe', 'short-spear', 'short-bow', 'iron-claw',
-      'silver-staff', 'ember-rod', 'bronze-plate', 'studded-leather', 'silk-robe',
-      'buckler', 'leather-cap', 'bronze-helm', 'silk-hood',
-    ],
-  },
-  {
-    level: 13,
-    items: [
-      'iron-sword', 'iron-dagger', 'battle-axe', 'war-lance', 'hunter-bow', 'tiger-claw',
-      'iron-plate', 'chain-vest', 'mage-robe', 'iron-shield', 'iron-helm', 'mage-hat',
-      'feather-cap', 'power-band',
-    ],
-  },
-  {
-    level: 21,
-    items: [
-      'silver-sword', 'assassin-dagger', 'great-axe', 'dragon-lance', 'elven-bow',
-      'dragon-claw', 'sage-staff', 'arcane-rod', 'war-hammer', 'mythril-plate',
-      'mythril-shield', 'mythril-helm', 'guard-charm',
-    ],
-  },
-  {
-    level: 30,
-    items: ['flame-sword', 'venom-fang', 'dragon-plate', 'aegis', 'ribbon'],
-  },
-  { level: 36, items: ['crown-blade'] },
-]
-
-function gearFor(character, level) {
-  const pool = GEAR_TIERS.filter((tier) => tier.level <= level).flatMap((tier) => tier.items)
-  const equipment = {}
-
-  for (const slot of ['weapon', 'offhand', 'head', 'body', 'accessory']) {
-    const best = pool
-      .filter((itemId) => getItem(itemId).slot === slot && canEquip(character, itemId))
-      .sort((a, b) => itemPower(getItem(b)) - itemPower(getItem(a)))[0]
-    if (best) equipment[slot] = best
-  }
-
-  return equipment
-}
-
-function itemPower(item) {
-  const stats = Object.values(item.stats ?? {}).reduce((total, value) => total + value, 0)
-  return (item.atk ?? 0) + (item.def ?? 0) + (item.mdef ?? 0) * 0.5 + stats * 2
-}
-
-function buildParty(classIds, level) {
-  return classIds.map((classId, index) => {
-    const bare = createCharacter({
-      id: `hero-${index}`,
-      name: classId,
-      classId,
-      level,
-      equipment: STARTING_EQUIPMENT[classId],
-    })
-    // The Monk is the exception: bare hands beat every claw in the game past
-    // the opening hours, so leaving the weapon slot empty is correct play.
-    const equipment = gearFor(bare, level)
-    if (bare.classId === 'monk' || bare.classId === 'master') delete equipment.weapon
-    return createCharacter({ id: bare.id, name: bare.name, classId, level, equipment })
-  })
-}
-
-/**
- * The auto-battler's policy. Deliberately competent but not optimal: heal when
- * someone is badly hurt, sweep with magic when the room is crowded, otherwise
- * swing. Numbers produced against a perfect player would flatter the balance.
- */
-function chooseCommands(battle) {
-  const commands = {}
-  const party = battle.combatants.filter((c) => c.side === 'party' && !isDown(c))
-  const foes = battle.combatants.filter((c) => c.side === 'enemy' && !isDown(c))
-  if (foes.length === 0) return commands
-
-  const weakest = party.reduce((worst, member) => {
-    const ratio = member.hp / effectiveStats(member).maxHp
-    return !worst || ratio < worst.ratio ? { member, ratio } : worst
-  }, null)
-
-  const fallen = battle.combatants.find((c) => c.side === 'party' && isDown(c))
-  let healerUsed = false
-
-  for (const member of party) {
-    const spells = member.spells.map(getSpell)
-    const target = foes[0]
-
-    // Revive first: a body on the floor is worse than any amount of damage.
-    const revive = spells.find((spell) => spell.kind === 'revive' && member.mp >= spell.mp)
-    if (fallen && revive && !healerUsed) {
-      commands[member.id] = { kind: 'spell', spellId: revive.id, targetId: fallen.id }
-      healerUsed = true
-      continue
-    }
-
-    // Group-heal when the whole party is being ground down -- which is how a
-    // real player answers an enemy that opens with area magic every round.
-    const hurtCount = party.filter(
-      (other) => other.hp / effectiveStats(other).maxHp < 0.55,
-    ).length
-    const groupHeal = spells
-      .filter((spell) => spell.kind === 'healAll' && member.mp >= spell.mp)
-      .sort((a, b) => b.power - a.power)[0]
-    if (!healerUsed && groupHeal && hurtCount >= 2) {
-      commands[member.id] = { kind: 'spell', spellId: groupHeal.id }
-      healerUsed = true
-      continue
-    }
-
-    // Heal when someone is under 40%.
-    const heals = spells
-      .filter((spell) => spell.kind === 'heal' && member.mp >= spell.mp)
-      .sort((a, b) => b.power - a.power)
-    if (!healerUsed && weakest && weakest.ratio < 0.4 && heals.length > 0) {
-      commands[member.id] = { kind: 'spell', spellId: heals[0].id, targetId: weakest.member.id }
-      healerUsed = true
-      continue
-    }
-
-    // Out of MP but someone is dying: drink. Players always have a bag full.
-    if (!healerUsed && weakest && weakest.ratio < 0.35) {
-      const potion = ['elixir', 'hi-potion', 'potion'].find((itemId) =>
-        battle.inventory.some((entry) => entry.id === itemId && entry.qty > 0),
-      )
-      if (potion) {
-        commands[member.id] = { kind: 'item', itemId: potion, targetId: weakest.member.id }
-        healerUsed = true
-        continue
-      }
-    }
-
-    // Sweep a crowd with the biggest affordable all-target spell.
-    if (foes.length >= 3) {
-      const sweep = spells
-        .filter(
-          (spell) =>
-            spell.kind === 'damage' && spell.target === 'allEnemies' && member.mp >= spell.mp,
-        )
-        .sort((a, b) => b.power - a.power)[0]
-      if (sweep) {
-        commands[member.id] = { kind: 'spell', spellId: sweep.id }
-        continue
-      }
-    }
-
-    // Single-target magic is worth it when it beats a swing outright.
-    const nuke = spells
-      .filter((spell) => spell.kind === 'damage' && spell.target === 'enemy' && member.mp >= spell.mp)
-      .sort((a, b) => b.power - a.power)[0]
-    const stats = effectiveStats(member)
-    if (nuke && nuke.power + stats.magicAttack * 0.6 > stats.attack * 1.4) {
-      commands[member.id] = { kind: 'spell', spellId: nuke.id, targetId: target.id }
-      continue
-    }
-
-    commands[member.id] = { kind: 'attack', targetId: target.id }
-  }
-
-  return commands
-}
-
-/** A plausible bag for that point in the game -- players hoard curatives. */
-function stockFor(level) {
-  if (level >= 28) return [{ id: 'elixir', qty: 2 }, { id: 'hi-potion', qty: 12 }]
-  if (level >= 16) return [{ id: 'hi-potion', qty: 10 }]
-  if (level >= 8) return [{ id: 'hi-potion', qty: 4 }, { id: 'potion', qty: 8 }]
-  return [{ id: 'potion', qty: 8 }]
-}
-
 function simulateOne(classIds, level, enemyIds, seed) {
-  const party = buildParty(classIds, level)
+  const party = buildReferenceParty(level, classIds)
   let battle = createBattle({
     party,
     inventory: stockFor(level),
@@ -258,7 +78,7 @@ function simulateOne(classIds, level, enemyIds, seed) {
 
   let rounds = 0
   while (battle.phase === BATTLE_PHASES.COMMAND && rounds < 100) {
-    const { state } = resolveRound(battle, chooseCommands(battle))
+    const { state } = resolveRound(battle, chooseAutoCommands(battle))
     battle = state
     rounds += 1
   }
@@ -347,10 +167,43 @@ function sweepRows() {
     if (node.kind !== 'dungeon') continue
     const dungeon = DUNGEONS[node.dungeonId]
     const level = node.recommended ?? 1
-    const table = ENCOUNTER_TABLES[dungeon.zone]
+    const arrival = node.arrival ?? level
 
-    for (const group of table.groups) {
-      rows.push({ area: dungeon.name, level, enemies: group.enemies, kind: 'random' })
+    // Every zone the dungeon uses, including per-floor overrides.
+    const zones = new Set([
+      dungeon.zone,
+      ...dungeon.floors.map((floor) => floor.zone).filter(Boolean),
+    ])
+
+    const entryZone = dungeon.floors[0].zone ?? dungeon.zone
+
+    for (const zoneId of zones) {
+      // You meet the entry zone at arrival level and the deeper zones a few
+      // levels later, having fought your way down to them.
+      const meetAt =
+        zoneId === entryZone ? arrival : Math.round((arrival + level) / 2)
+
+      for (const group of ENCOUNTER_TABLES[zoneId].groups) {
+        // Arrival matters more than depth: a group that is fine at the
+        // recommended level can still be a wipe on the way in.
+        rows.push({
+          area: dungeon.name,
+          level: meetAt,
+          enemies: group.enemies,
+          kind: 'arrival',
+          zone: zoneId,
+        })
+        // Only the dungeon's main zone is expected to still bite at the
+        // recommended level -- an entry floor you have outgrown is meant to
+        // be easy on the way back out.
+        rows.push({
+          area: dungeon.name,
+          level,
+          enemies: group.enemies,
+          kind: 'random',
+          main: zoneId === dungeon.zone,
+        })
+      }
     }
 
     for (const floor of dungeon.floors) {
@@ -384,7 +237,7 @@ if (args.sweep) {
     }
     const result = simulate({ ...args, level: entry.level, enemies: entry.enemies })
     printRow(
-      `Lv${String(entry.level).padStart(2)} ${entry.kind === 'boss' ? '*' : ' '} ${entry.enemies.join('+')}`,
+      `Lv${String(entry.level).padStart(2)} ${entry.kind === 'boss' ? '*' : entry.kind === 'arrival' ? '>' : ' '} ${entry.enemies.join('+')}`,
       result,
     )
 
@@ -404,12 +257,19 @@ if (args.sweep) {
           `${entry.area} Lv${entry.level} ${entry.enemies.join('+')} is free (${percent(result.avgHpLeft)} hp, ${percent(result.avgMpSpent)} mp)`,
         )
       }
+    } else if (entry.kind === 'arrival') {
+      // Walking in should not be a coin flip.
+      if (result.winRate < 0.9) {
+        offenders.push(
+          `${entry.area} ARRIVAL Lv${entry.level} ${entry.enemies.join('+')} -> ${percent(result.winRate)} (${result.avgDeaths.toFixed(1)} deaths)`,
+        )
+      }
     } else if (result.winRate < 0.85) {
       offenders.push(
         `${entry.area} Lv${entry.level} ${entry.enemies.join('+')} -> ${percent(result.winRate)} (too hard)`,
       )
     }
-    if (entry.kind === 'random' && result.avgHpLeft > 0.92) {
+    if (entry.kind === 'random' && entry.main && result.avgHpLeft > 0.92) {
       offenders.push(
         `${entry.area} Lv${entry.level} ${entry.enemies.join('+')} costs nothing (${percent(result.avgHpLeft)} hp left)`,
       )
