@@ -31,6 +31,12 @@ waiting for an answer.
 | **Camera translate** | One button that opens Google Translate / Lens. We don't rebuild this. |
 | **Numbers & counting** | How to read prices (千 = 1,000, 万 = 10,000!) and how to say "two people" / "two of these". |
 
+### A2. Phrase builder (v0.2, built)
+
+Frame + word: "Where is …?" + toilet → トイレはどこですか. There are 21
+frames and 121 words, including custom names and counters. See
+[05-phrase-builder.md](05-phrase-builder.md).
+
 ### B. Money (MVP)
 
 | Feature | Details |

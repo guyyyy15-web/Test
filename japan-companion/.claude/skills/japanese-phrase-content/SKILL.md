@@ -15,6 +15,7 @@ no phrase. Everything in `app/src/content/` must pass the checklist below.
 | `phrases.json` | Things **we say**, grouped by category. Can be shown as a card. |
 | `listening.json` | Things **they say to us** (konbini, restaurant, station), with what to answer |
 | `signs.json` | Kanji seen on signs and menus, for recognising, not saying |
+| `vocab.json` + `patterns.ts` | The phrase builder: words with types, and sentence frames with a `{N}` slot |
 
 ## Phrase schema
 
@@ -89,6 +90,29 @@ added, read it next to `romaji` aloud. If an Israeli would stumble, simplify.
 ```
 
 `where` must be one of `station | street | restaurant | shop | toilet | onsen | hotel | menu`.
+
+## Phrase builder (`vocab.json`, `patterns.ts`)
+
+A frame is a fixed Japanese sentence with one noun slot `{N}` (and `{C}`
+for a count). The particle belongs to the **frame** (`{N}はどこですか`),
+never to the word, so any noun keeps the sentence grammatical. The job is
+to prevent **nonsense**, and that's what types do.
+
+- **Adding a word:** give it every type it really fits (`ticket` is both
+  `thing` and `belonging`). Fill `he` (indefinite) and `he_def`
+  (definite, with ה in the right place: "תחנת הרכבת", not "התחנת רכבת").
+  Set `en_a` when "a/an + en" reads wrong ("an ATM", "cash", "chopsticks").
+  Set `counter: "mai"` for flat things (tickets, maps, towels, receipts).
+- **Adding a frame:** `accepts` lists only types where *every* word makes
+  sense. Read the result for 3–4 words of each accepted type before
+  committing.
+- **Hebrew gloss:** never glue a prefix letter onto `{he_def}`
+  (ל/ב/מ/ה/ו/כ/ש + "התחנה"). Use free-standing words ("עד", "אל",
+  "את", "המחיר של") or the indefinite `{he}` ("ב{he}" → "בכרטיס אשראי").
+  `builder.test.ts` enforces this.
+- `builder.test.ts` builds every frame × word and checks there are no
+  leftover `{…}`, the kana is kana only, and there's Hebrew in the gloss.
+  Add a pinned example for any new frame.
 
 ## Verification checklist (every change)
 

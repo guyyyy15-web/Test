@@ -38,6 +38,7 @@ await page.waitForSelector('.tabbar')
 
 const tabs = [
   ['phrases', { he: 'ביטויים', en: 'Phrases' }],
+  ['builder', { he: 'בונה משפטים', en: 'Builder' }],
   ['signs', { he: 'שלטים', en: 'Signs' }],
   ['money', { he: 'כסף', en: 'Money' }],
   ['guide', { he: 'מדריך', en: 'Guide' }],
@@ -63,6 +64,19 @@ const outs = await page.$$eval('.display-out', (els) => els.map((e) => e.textCon
 check(outs.some((t) => t.includes('₪')) && outs.some((t) => t.includes('$')), `converter ¥5,000 → ${outs.join(' / ')}`)
 check((await page.textContent('.rate-line')).includes('שער עדכני'), 'live rate picked up')
 await page.screenshot({ path: `${OUT}he-money-5000.png`, fullPage: true })
+
+// Builder: "Where is …?" + toilet, then tickets × 2.
+await page.click('.tab:has-text("בונה משפטים")')
+await page.click('.frame:has-text("איפה …?")')
+await page.click('.word:has-text("שירותים")')
+check((await page.textContent('.builder-result .ja-line')) === 'トイレはどこですか', 'builder: where + toilet')
+await page.screenshot({ path: `${OUT}he-builder.png` })
+await page.click('.frame:has-text("× כמות")')
+await page.click('.word:has-text("כרטיס") >> nth=0')
+await page.click('.stepper button:has-text("+")')
+const tickets = await page.textContent('.builder-result .ja-line')
+check(tickets === '切符を二枚お願いします', `builder: tickets × 2 → ${tickets}`)
+await page.screenshot({ path: `${OUT}he-builder-count.png` })
 
 // Show-card.
 await page.click('.tab:has-text("ביטויים")')

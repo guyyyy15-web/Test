@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { TabBar, type Tab } from './components/TabBar'
 import { PhrasesView } from './features/phrases/PhrasesView'
+import { BuilderView } from './features/builder/BuilderView'
 import { SignsView } from './features/signs/SignsView'
 import { MoneyView } from './features/money/MoneyView'
 import { GuideView } from './features/guide/GuideView'
@@ -30,6 +31,7 @@ export function App() {
       </header>
       <main>
         {tab === 'phrases' && <PhrasesView />}
+        {tab === 'builder' && <BuilderView />}
         {tab === 'signs' && <SignsView />}
         {tab === 'money' && <MoneyView />}
         {tab === 'guide' && <GuideView />}
