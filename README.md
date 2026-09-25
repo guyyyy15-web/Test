@@ -6,6 +6,8 @@ Build a party of four heroes from six classes, walk the Ember Mine, take the
 drowned coast road, climb the Storm Spire, and go down into the caldera after
 the crown. Four stones, four keepers, one ending.
 
+**Play:** https://guyyyy15-web.github.io/Test/
+
 ```bash
 npm install
 npm run dev      # play it
