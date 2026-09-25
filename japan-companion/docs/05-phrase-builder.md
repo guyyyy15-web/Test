@@ -52,13 +52,39 @@ swap nouns ("… wa doko desu ka", "… o kudasai", "… wa arimasu ka",
 | | No …, please | {N}抜きでお願いします | ingredient |
 | | Is there … in this? | これに{N}は入っていますか | ingredient |
 | | Can I use … here? | ここで{N}は使えますか | usable |
-| Problems | We're looking for … | {N}を探しています | place, thing, belonging, custom |
+| | Where does … leave from? / When is the next …? | {N}はどこから出ますか / 次の{N}は何時ですか | vehicle |
+| | Do you know …? | {N}を知っていますか | place, sight, pointer, this, custom |
+| Ordering & shopping (v0.3) | Can I have …? | {N}をもらえますか | food, drink, thing, this, amenity |
+| | Could you show me …? | {N}を見せてもらえますか | thing, this |
+| | Any … you recommend? | おすすめの{N}はありますか | food, drink, sight |
+| | How much to rent …? / Where can I rent …? | {N}のレンタルはいくらですか / {N}はどこで借りられますか | rentable |
+| | Is … included? | {N}は付いていますか | amenity |
+| Requests (v0.3) | Could you …? | {V}もらえますか | request verbs (22) |
+| | May I …? | {V}もいいですか | may-i verbs (16) |
+| Problems | … is broken / … doesn't work | {N}が壊れています / {N}が使えません | fixture, works |
+| | We're looking for … | {N}を探しています | place, thing, belonging, custom |
 | | I lost my … | {N}をなくしました | belonging |
 | | My … hurts | {N}が痛いです | body |
 
 **Pointer words** make the builder work with maps and fingers: "here"
-(ここ) and "this address" (この住所) for places, and "this" (これ) for
-things.
+(ここ) and "this address" (この住所) for places; "this" (これ), "that"
+(それ, near the other person) and "that one over there" (あれ) for things.
+
+## Verb frames (v0.3)
+
+"Could you heat it up?", "Can you help me fix that?", "May I take a
+photo?" are about **actions**, not things. Japanese makes these regular
+too. Take the verb's **te-form** and add a fixed ending:
+
+| Ending | Meaning | Example |
+|--------|---------|---------|
+| 〜てもらえますか | Could you … (for me)? | 温めてもらえますか: could you heat it up? |
+| 〜てもいいですか | May I …? | 写真を撮ってもいいですか: may I take a photo? |
+
+So verbs are stored as ready te-form phrases ("温めて", "地図で教えて",
+"ペンを貸して") and slot into `{N}` like any word. The two lists are
+separate, because "may I heat it up?" and "could you sit here?" make no
+sense.
 
 ## Hebrew and English glosses
 
@@ -88,7 +114,7 @@ offers 1–5.
 
 ## Status
 
-Built in v0.2: 21 frames, 121 words, 1–5 counters, custom names, a
+Built in v0.2 and extended in v0.3: 34 frames, 190 words and verbs, 1–5 counters, custom names, a
 "Recent" list, and the sticky result card with 🔊 and 🪧. Tests build
 **every frame × every word it accepts** and check that each sentence is
 complete, in kana, and glossed in Hebrew. They also pin known sentences

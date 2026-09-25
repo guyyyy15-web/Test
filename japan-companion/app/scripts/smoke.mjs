@@ -77,6 +77,11 @@ await page.click('.stepper button:has-text("+")')
 const tickets = await page.textContent('.builder-result .ja-line')
 check(tickets === '切符を二枚お願いします', `builder: tickets × 2 → ${tickets}`)
 await page.screenshot({ path: `${OUT}he-builder-count.png` })
+await page.click('.frame:has-text("תוכלו …?")')
+await page.click('.word:has-text("לחמם את זה")')
+const heat = await page.textContent('.builder-result .ja-line')
+check(heat === '温めてもらえますか', `builder: could you heat it up → ${heat}`)
+await page.screenshot({ path: `${OUT}he-builder-request.png` })
 
 // Show-card.
 await page.click('.tab:has-text("ביטויים")')

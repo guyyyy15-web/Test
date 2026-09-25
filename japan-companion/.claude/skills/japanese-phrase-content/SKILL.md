@@ -110,6 +110,15 @@ to prevent **nonsense**, and that's what types do.
   (ל/ב/מ/ה/ו/כ/ש + "התחנה"). Use free-standing words ("עד", "אל",
   "את", "המחיר של") or the indefinite `{he}` ("ב{he}" → "בכרטיס אשראי").
   `builder.test.ts` enforces this.
+- **Verbs** go in `vocab.json` as ready **te-form** phrases (温めて,
+  ペンを貸して, 写真を撮って) typed `request` ("Could you …?" →
+  〜もらえますか) or `may-i` ("May I …?" → 〜もいいですか). Check the
+  te-form carefully: う/つ/る → って, む/ぶ/ぬ → んで, く → いて, ぐ → いで,
+  す → して, and 行く → 行って. `he` is a Hebrew infinitive ("לחמם את
+  זה") because the frames are "תוכלו …?" and "אפשר …?".
+- Watch for frames where one type contains a word that turns the sentence
+  into nonsense (現金が使えません). Split off a narrower type (`works`)
+  rather than accepting a broad one.
 - `builder.test.ts` builds every frame × word and checks there are no
   leftover `{…}`, the kana is kana only, and there's Hebrew in the gloss.
   Add a pinned example for any new frame.

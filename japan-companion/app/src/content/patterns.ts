@@ -12,9 +12,17 @@ export type WordType =
   | 'body'
   | 'belonging'
   | 'usable'
+  | 'sight'
+  | 'fixture'
+  | 'rentable'
+  | 'amenity'
+  | 'vehicle'
+  | 'request'
+  | 'may-i'
+  | 'works'
   | 'custom'
 
-export type PatternGroup = 'around' | 'order' | 'problems'
+export type PatternGroup = 'around' | 'order' | 'requests' | 'problems'
 
 /**
  * A sentence frame. `{N}` is the noun; `{C}` the count (only with `count: true`).
@@ -100,6 +108,25 @@ export const PATTERNS: Pattern[] = [
   },
 
   {
+    id: 'next', group: 'around', accepts: ['vehicle'],
+    label: { he: 'מתי ה… הבא?', en: 'When is the next …?' },
+    ja: '次の{N}は何時ですか', kana: 'つぎの{N}はなんじですか', romaji: 'tsugi no {N} wa nanji desu ka', he_pron: 'צוגי נו {N} וה נאנג\'י דס קה',
+    he: 'מתי היציאה הבאה של {he_def}?', en: 'What time is the next {en}?',
+  },
+  {
+    id: 'leaves-from', group: 'around', accepts: ['vehicle'],
+    label: { he: 'מאיפה עולים על …?', en: 'Where does … leave from?' },
+    ja: '{N}はどこから出ますか', kana: '{N}はどこからでますか', romaji: '{N} wa doko kara demasu ka', he_pron: '{N} וה דוקו קארה דמאס קה',
+    he: 'מאיפה עולים על {he_def}?', en: 'Where does {the} leave from?',
+  },
+  {
+    id: 'know', group: 'around', accepts: ['place', 'sight', 'pointer-place', 'this', 'custom'],
+    label: { he: 'אתם מכירים את …?', en: 'Do you know …?' },
+    ja: '{N}を知っていますか', kana: '{N}をしっていますか', romaji: '{N} o shitte imasu ka', he_pron: '{N} או שיטה אימאס קה',
+    he: 'אתם מכירים את {he_def}?', en: 'Do you know {the}?',
+  },
+
+  {
     id: 'please', group: 'order', accepts: GOODS,
     label: { he: '…, בבקשה', en: '…, please' },
     ja: '{N}をお願いします', kana: '{N}をおねがいします', romaji: '{N} o onegaishimasu', he_pron: '{N} או אונגאי שימאס',
@@ -149,6 +176,56 @@ export const PATTERNS: Pattern[] = [
   },
 
   {
+    id: 'can-i-have', group: 'order', accepts: [...GOODS, 'amenity'],
+    label: { he: 'אפשר לקבל …?', en: 'Can I have …?' },
+    ja: '{N}をもらえますか', kana: '{N}をもらえますか', romaji: '{N} o moraemasu ka', he_pron: '{N} או מוראאמאס קה',
+    he: 'אפשר לקבל {he}?', en: 'Can I have {a}?',
+  },
+  {
+    id: 'show-me', group: 'order', accepts: ['thing', 'this'],
+    label: { he: 'אפשר לראות את …?', en: 'Can you show me …?' },
+    ja: '{N}を見せてもらえますか', kana: '{N}をみせてもらえますか', romaji: '{N} o misete moraemasu ka', he_pron: '{N} או מיסטה מוראאמאס קה',
+    he: 'תוכלו להראות לי את {he_def}?', en: 'Could you show me {the}?',
+  },
+  {
+    id: 'recommend', group: 'order', accepts: ['food', 'drink', 'sight'],
+    label: { he: 'המלצה על …?', en: 'Any … you recommend?' },
+    ja: 'おすすめの{N}はありますか', kana: 'おすすめの{N}はありますか', romaji: 'osusume no {N} wa arimasu ka', he_pron: 'אוסוסומה נו {N} וה ארימאס קה',
+    he: 'יש לכם המלצה על {he}?', en: 'Is there {a} you recommend?',
+  },
+  {
+    id: 'rent-price', group: 'order', accepts: ['rentable'],
+    label: { he: 'כמה עולה לשכור …?', en: 'How much to rent …?' },
+    ja: '{N}のレンタルはいくらですか', kana: '{N}のレンタルはいくらですか', romaji: '{N} no rentaru wa ikura desu ka', he_pron: '{N} נו רנטארו וה איקורה דס קה',
+    he: 'כמה עולה לשכור {he}?', en: 'How much is it to rent {a}?',
+  },
+  {
+    id: 'rent-where', group: 'order', accepts: ['rentable'],
+    label: { he: 'איפה אפשר לשכור …?', en: 'Where can I rent …?' },
+    ja: '{N}はどこで借りられますか', kana: '{N}はどこでかりられますか', romaji: '{N} wa doko de kariraremasu ka', he_pron: '{N} וה דוקו דה קארירארמאס קה',
+    he: 'איפה אפשר לשכור {he}?', en: 'Where can I rent {a}?',
+  },
+  {
+    id: 'included', group: 'order', accepts: ['amenity'],
+    label: { he: '… כלול?', en: 'Is … included?' },
+    ja: '{N}は付いていますか', kana: '{N}はついていますか', romaji: '{N} wa tsuite imasu ka', he_pron: '{N} וה צויטה אימאס קה',
+    he: 'זה כולל {he}?', en: 'Is {a} included?',
+  },
+
+  {
+    id: 'do-for-me', group: 'requests', accepts: ['request'],
+    label: { he: 'תוכלו …?', en: 'Could you …?' },
+    ja: '{N}もらえますか', kana: '{N}もらえますか', romaji: '{N} moraemasu ka', he_pron: '{N} מוראאמאס קה',
+    he: 'תוכלו {he}?', en: 'Could you {en}?',
+  },
+  {
+    id: 'may-i', group: 'requests', accepts: ['may-i'],
+    label: { he: 'אפשר …?', en: 'May I …?' },
+    ja: '{N}もいいですか', kana: '{N}もいいですか', romaji: '{N} mo ii desu ka', he_pron: '{N} מו אי דס קה',
+    he: 'אפשר {he}?', en: 'May I {en}?',
+  },
+
+  {
     id: 'looking-for', group: 'problems', accepts: ['place', 'thing', 'custom'],
     label: { he: 'אנחנו מחפשים …', en: "We're looking for …" },
     ja: '{N}を探しています', kana: '{N}をさがしています', romaji: '{N} o sagashite imasu', he_pron: '{N} או סאגאשיטה אימאס',
@@ -165,5 +242,17 @@ export const PATTERNS: Pattern[] = [
     label: { he: 'כואב לי …', en: 'My … hurts' },
     ja: '{N}が痛いです', kana: '{N}がいたいです', romaji: '{N} ga itai desu', he_pron: '{N} גה איטאי דס',
     he: 'כואב לי {he_def}', en: 'My {en} hurts',
+  },
+  {
+    id: 'broken', group: 'problems', accepts: ['fixture'],
+    label: { he: 'יש תקלה ב…', en: '… is broken' },
+    ja: '{N}が壊れています', kana: '{N}がこわれています', romaji: '{N} ga kowarete imasu', he_pron: '{N} גה קווארטה אימאס',
+    he: 'יש תקלה ב{he}', en: '{The} is broken',
+  },
+  {
+    id: 'not-working', group: 'problems', accepts: ['fixture', 'works'],
+    label: { he: 'לא מצליחים להשתמש ב…', en: "… doesn't work" },
+    ja: '{N}が使えません', kana: '{N}がつかえません', romaji: '{N} ga tsukaemasen', he_pron: '{N} גה צוקאאמאסן',
+    he: 'לא מצליחים להשתמש ב{he}', en: "{The} doesn't work",
   },
 ]

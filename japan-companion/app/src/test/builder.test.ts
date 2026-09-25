@@ -5,7 +5,11 @@ import { en } from '../i18n/en'
 
 const KANA_ONLY = /^[぀-ゟ゠-ヿー]+$/
 const HEBREW = /[א-ת]/
-const TYPES: WordType[] = ['place', 'pointer-place', 'this', 'thing', 'food', 'drink', 'ingredient', 'body', 'belonging', 'usable', 'custom']
+const TYPES: WordType[] = [
+  'place', 'pointer-place', 'this', 'thing', 'food', 'drink', 'ingredient', 'body', 'belonging', 'usable',
+  'sight', 'fixture', 'rentable', 'amenity', 'vehicle', 'request', 'may-i', 'works', 'custom',
+]
+const HEADING_OF = (t: WordType) => (t === 'pointer-place' || t === 'this' ? 'type.pointer' : t === 'works' ? 'type.usable' : `type.${t}`)
 const byId = (id: string) => VOCAB.find((w) => w.id === id)!
 const frame = (id: string) => PATTERNS.find((p) => p.id === id)!
 
@@ -46,7 +50,7 @@ describe('frames', () => {
   it('have a heading for every word type they accept', () => {
     for (const p of PATTERNS)
       for (const t of p.accepts.filter((x) => x !== 'custom'))
-        expect(en, `${p.id}/${t}`).toHaveProperty(t === 'pointer-place' || t === 'this' ? 'type.pointer' : `type.${t}`)
+        expect(Object.keys(en), `${p.id}/${t}`).toContain(HEADING_OF(t))
   })
 })
 
@@ -72,6 +76,28 @@ describe('build', () => {
     expect(build(frame('hurts'), byId('head')).kana).toBe('あたまがいたいです')
     expect(build(frame('can-use'), byId('credit-card')).ja).toBe('ここでクレジットカードは使えますか')
     expect(build(frame('how-much'), byId('this')).ja).toBe('これはいくらですか')
+  })
+
+  it('covers asking people to do things, and asking permission', () => {
+    expect(build(frame('do-for-me'), byId('do-heat')).ja).toBe('温めてもらえますか')
+    expect(build(frame('do-for-me'), byId('do-heat')).en).toBe('Could you heat it up?')
+    expect(build(frame('do-for-me'), byId('do-fix')).romaji).toBe('naoshite moraemasu ka')
+    expect(build(frame('may-i'), byId('may-photo')).ja).toBe('写真を撮ってもいいですか')
+    expect(build(frame('may-i'), byId('may-card')).he).toBe('אפשר לשלם בכרטיס?')
+  })
+
+  it('covers renting, pointing, knowing and broken things', () => {
+    expect(build(frame('rent-price'), byId('bicycle')).ja).toBe('自転車のレンタルはいくらですか')
+    expect(build(frame('rent-price'), byId('bicycle')).en).toBe('How much is it to rent a bicycle?')
+    expect(build(frame('how-much'), byId('that')).ja).toBe('それはいくらですか')
+    expect(build(frame('how-much'), byId('that')).en).toBe('How much is that?')
+    expect(build(frame('can-i-have'), byId('this')).ja).toBe('これをもらえますか')
+    expect(build(frame('show-me'), byId('this')).ja).toBe('これを見せてもらえますか')
+    expect(build(frame('know'), byId('here')).ja).toBe('ここを知っていますか')
+    expect(build(frame('next'), byId('bus')).ja).toBe('次のバスは何時ですか')
+    expect(build(frame('broken'), byId('aircon')).ja).toBe('エアコンが壊れています')
+    expect(build(frame('not-working'), byId('suica')).en).toBe("My Suica doesn't work")
+    expect(build(frame('included'), byId('breakfast')).en).toBe('Is breakfast included?')
   })
 
   it('uses the right counter', () => {

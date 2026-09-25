@@ -92,11 +92,14 @@ export function build(pattern: Pattern, word: Word, count = 1): Built {
   const n = Math.min(Math.max(1, Math.round(count)), MAX_COUNT)
   const c = COUNTERS[word.counter ?? 'tsu'][n - 1]
   const bare = word.en_bare ?? word.en
+  const the = word.en_the ?? `the ${bare}`
+  const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1)
   const en = {
     en: bare,
-    En: bare.charAt(0).toUpperCase() + bare.slice(1),
+    En: cap(bare),
     a: word.en_a ?? article(bare),
-    the: word.en_the ?? `the ${bare}`,
+    the,
+    The: cap(the),
     n: String(n),
   }
   return {

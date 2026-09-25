@@ -9,7 +9,7 @@ import { matches } from '../../lib/search'
 import { canSpeak, speakJapanese } from '../../lib/speech'
 import { load, save } from '../../lib/storage'
 
-const GROUPS: PatternGroup[] = ['around', 'order', 'problems']
+const GROUPS: PatternGroup[] = ['around', 'order', 'requests', 'problems']
 const HEADING: Record<Exclude<WordType, 'custom'>, Key> = {
   place: 'type.place',
   'pointer-place': 'type.pointer',
@@ -21,6 +21,14 @@ const HEADING: Record<Exclude<WordType, 'custom'>, Key> = {
   body: 'type.body',
   belonging: 'type.belonging',
   usable: 'type.usable',
+  works: 'type.usable',
+  sight: 'type.sight',
+  fixture: 'type.fixture',
+  rentable: 'type.rentable',
+  amenity: 'type.amenity',
+  vehicle: 'type.vehicle',
+  request: 'type.request',
+  'may-i': 'type.may-i',
 }
 
 interface Recent {
