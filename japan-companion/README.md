@@ -9,7 +9,46 @@ visitor well.
 2. **Money:** know what something costs in shekels and dollars, and handle a
    country that still runs on cash.
 
-> **Status:** planning. There is no app code yet. Start with the docs below.
+> **Status:** MVP built (v0.1). It has phrases, show-cards, signs, a converter
+> and a guide, and it works offline. It isn't deployed yet (see open questions).
+
+## Run it
+
+```bash
+cd app
+npm install
+npm run dev        # http://localhost:5173
+npm test           # unit tests: money maths, i18n parity, content schema
+npm run lint
+npm run build      # dist/ + service worker
+npm run preview &  # then: npm run smoke  (iPhone-viewport browser test, writes screenshots/)
+```
+
+## What's in v0.1
+
+| Tab | What it does |
+|-----|--------------|
+| 💬 Phrases | 102 phrases in 9 categories: Japanese, Hebrew pronunciation, romaji, 🔊 audio, ★ favorites, search. 🪧 opens a **full-screen card** to show staff, with the screen kept on and a flip-toward-them button. **👂 "They say"**: 20 phrases staff say to *you* (konbini, restaurant, station), each with what to answer. |
+| 🈯 Signs | 83 kanji from signs and menus (exits, push/pull, open/closed, tax-free, pork/beef, onsen curtains…), by place, searchable |
+| 💴 Money | ¥ ↔ ₪ ↔ $ keypad converter, live rate cached for offline, optional card-fee % and a manual rate, a quick-reference table, and a tax-free check (≥ ¥5,000 before tax) |
+| 🧭 Guide | Tap-to-call emergency numbers and the Israeli embassy, a pre-flight checklist, cash & ATMs, tax-free rules, trains & Suica, etiquette, earthquakes |
+
+Everything is Hebrew (RTL) or English with one toggle.
+
+| Hebrew phrases | Show-card | Converter | Signs (English) |
+|---|---|---|---|
+| ![](screenshots/he-phrases.png) | ![](screenshots/he-showcard.png) | ![](screenshots/he-money.png) | ![](screenshots/en-signs.png) |
+
+## Claude skills for this project
+
+`.claude/skills/` holds project skills Claude uses while building this app:
+
+| Skill | Use |
+|-------|-----|
+| `japanese-phrase-content` | Schema, politeness level, Hebrew transliteration rules, and a verification checklist for every phrase/sign |
+| `ios-pwa` | iPhone Safari PWA rules: install, offline, sub-path hosting, Japanese speech, wake lock, safe areas |
+| `bilingual-rtl-ui` | Hebrew/English i18n and RTL: logical CSS, isolating Japanese and money, Hebrew copy tone |
+| `release-check` | The pre-push routine: lint, tests, build, then an iPhone-viewport browser pass in both languages plus an offline reload |
 
 ## Documents
 
@@ -28,23 +67,25 @@ visitor well.
 | UI language | Hebrew and English, with a toggle; Hebrew is right-to-left |
 | Priority | Language help and money first |
 | Scope | General Japan, not tied to a specific itinerary |
-| Diet cards | Not needed personally; keep a generic allergy card as a stretch |
+| Diet cards | Not needed |
+| Look | Calm Japanese minimal: paper white, ink, vermilion (torii red); follows dark mode |
 | Tax-free | Trip ends before Nov 1, 2026, so the **current** rules apply (discount at the till) |
 
-## Planned layout
+## Layout
 
 ```
 japan-companion/
-├── README.md
-├── docs/            planning documents (this phase)
-├── app/             the PWA source (phase 1)
-│   ├── src/
-│   │   ├── features/phrasebook/
-│   │   ├── features/converter/
-│   │   ├── features/signs/
-│   │   ├── features/money-guide/
-│   │   ├── features/emergency/
-│   │   └── i18n/    he.json, en.json
-│   └── public/      icons, manifest, offline assets
-└── content/         phrase & sign data (JSON), editable without touching code
+├── .claude/skills/        project skills (see above)
+├── docs/                  research, plan, architecture, open questions
+├── screenshots/           output of `npm run smoke`
+└── app/
+    ├── public/            icons (torii), rendered by scripts/icons.mjs
+    ├── scripts/           smoke.mjs (browser test), icons.mjs
+    └── src/
+        ├── content/       phrases.json, listening.json, signs.json, guide.ts, content data only
+        ├── i18n/          en.ts (source of keys), he.ts
+        ├── lib/           money, storage, speech, wake lock, search
+        ├── components/    Ja, MoneyText, ShowCard, Chips, TabBar
+        ├── features/      phrases, signs, money, guide
+        └── test/          vitest suites
 ```
