@@ -6,6 +6,8 @@ import { K17_C } from './config/tunings'
 import { free } from './screens/free'
 import { home } from './screens/home'
 import { lab } from './screens/lab'
+import { play } from './screens/play'
+import { songs } from './screens/songs'
 import { soon } from './screens/soon'
 
 const tuning = K17_C
@@ -16,7 +18,9 @@ const routes: Record<string, Screen> = {
   '': home,
   free,
   lab,
-  songs: soon('שירים'),
+  songs,
+  play,
+  import: soon('הוספת שיר'),
   tuner: soon('כיוון'),
 }
 

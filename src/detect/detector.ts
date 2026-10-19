@@ -96,8 +96,9 @@ export const DEFAULT_CONFIG: Omit<DetectorConfig, 'sampleRate' | 'tines'> = {
   minGrowth: 0.05,
 }
 
-/** YIN confidence of a single clean tone; mixes of two tines score lower. */
-const CLEAN_CONFIDENCE = 0.95
+/** YIN confidence of a single clean tone (~0.999). Two tines ringing together
+ * can still score 0.96 at a phantom pitch between them, so the bar is high. */
+const CLEAN_CONFIDENCE = 0.985
 
 export interface NoteEvent {
   tine: Tine

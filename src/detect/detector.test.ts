@@ -109,6 +109,11 @@ describe('NoteDetector', () => {
     expect(detect(sig)).toEqual([])
   })
 
+  it('hears a neighbour played over a ringing tine (C4 → D4 → C4)', () => {
+    const sig = mix(renderPerformance([60, 62, 60].map((m, i) => ({ hz: midiToHz(m), at: 0.5 + i * 0.6 })), 2.5, SR), quiet(2.5))
+    expect(names(detect(sig))).toEqual(['C4', 'D4', 'C4'])
+  })
+
   it('ignores notes that are not on the instrument', () => {
     const sig = renderPerformance([{ hz: midiToHz(61), at: 0.2 }], 1, SR) // C#4
     expect(detect(sig)).toEqual([])
