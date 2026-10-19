@@ -1,12 +1,15 @@
-// Minimal biquad low-pass (RBJ cookbook), run over a whole frame.
+// Minimal biquad filters (RBJ audio-EQ cookbook), run over a whole buffer
+// from a zero state.
 
-export function lowpass(input: Float32Array, out: Float32Array, cutoffHz: number, sampleRate: number, q = Math.SQRT1_2) {
+export type BiquadType = 'lowpass' | 'highpass'
+
+export function biquad(type: BiquadType, input: Float32Array, out: Float32Array, cutoffHz: number, sampleRate: number, q = Math.SQRT1_2) {
   const w0 = (2 * Math.PI * cutoffHz) / sampleRate
   const alpha = Math.sin(w0) / (2 * q)
   const cos = Math.cos(w0)
   const a0 = 1 + alpha
-  const b0 = (1 - cos) / 2 / a0
-  const b1 = (1 - cos) / a0
+  const b0 = (type === 'lowpass' ? (1 - cos) / 2 : (1 + cos) / 2) / a0
+  const b1 = (type === 'lowpass' ? 1 - cos : -(1 + cos)) / a0
   const b2 = b0
   const a1 = (-2 * cos) / a0
   const a2 = (1 - alpha) / a0
@@ -17,4 +20,8 @@ export function lowpass(input: Float32Array, out: Float32Array, cutoffHz: number
     x2 = x1; x1 = x; y2 = y1; y1 = y
     out[i] = y
   }
+}
+
+export function lowpass(input: Float32Array, out: Float32Array, cutoffHz: number, sampleRate: number) {
+  biquad('lowpass', input, out, cutoffHz, sampleRate)
 }

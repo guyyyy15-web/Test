@@ -19,7 +19,7 @@ export class MicInput {
   private stream: MediaStream | null = null
   private source: MediaStreamAudioSourceNode | null = null
 
-  constructor(public frameSize = 2048) {}
+  constructor(public frameSize = 4096) {}
 
   get sampleRate() {
     return this.ctx?.sampleRate ?? 48000

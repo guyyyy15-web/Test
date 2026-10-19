@@ -59,10 +59,29 @@ export function createYin(frameSize: number, opts: YinOptions) {
       if (v < bestVal) { bestVal = v; bestTau = tau }
     }
     if (bestTau === lo || bestTau === hi) return coarseTau
-    const a = d(bestTau - 1)
-    const c = d(bestTau + 1)
-    const denom = a - 2 * bestVal + c
-    return denom > 0 ? bestTau + (a - c) / (2 * denom) : bestTau
+
+    // Octave-up guard, done here because the inharmonic partial is filtered
+    // out: if the frame repeats much better at twice the period, there is a
+    // real component an octave below and that is the fundamental.
+    const twice = bestTau * 2
+    if (sr / twice >= opts.minHz && skip + win + twice < frameSize) {
+      let energy = 0
+      for (let j = skip; j < skip + win; j++) energy += filtered[j] * filtered[j]
+      const dTwice = Math.min(d(twice - 1), d(twice), d(twice + 1))
+      if (bestVal > 0.1 * energy && dTwice < 0.25 * bestVal) return refineAround(twice)
+    }
+    return refineAround(bestTau)
+
+    function refineAround(tau: number) {
+      let t = tau
+      while (d(t - 1) < d(t)) t--
+      while (d(t + 1) < d(t)) t++
+      const a = d(t - 1)
+      const b = d(t)
+      const c = d(t + 1)
+      const denom = a - 2 * b + c
+      return denom > 0 ? t + (a - c) / (2 * denom) : t
+    }
   }
 
   return function estimate(frame: Float32Array): PitchEstimate {

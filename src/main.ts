@@ -1,156 +1,168 @@
 import './style.css'
-import { K17_C, degreeLabel, midiToHz, type Tine } from './config/tunings'
+import { K17_C, degreeLabel, type Tine } from './config/tunings'
 import { MicError, MicInput } from './audio/mic'
-import { createYin, rmsDb } from './detect/yin'
-import { snapToTine } from './detect/snap'
+import { NoteDetector, type FrameInfo, type NoteEvent } from './detect/detector'
+import { DebugPanel } from './ui/debugPanel'
+import { TineStrip } from './ui/tineStrip'
 import { DEGREE_COLORS } from './theme'
 
 const tuning = K17_C
-const FRAME = 2048
-/** Below this level nothing counts as a note (room noise). */
-const GATE_DB = -55
-const MIN_CONFIDENCE = 0.8
-const MIN_HZ = 220
-const MAX_HZ = 1500
+const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T
 
-const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T
-
-const mic = new MicInput(FRAME)
-const frame = new Float32Array(FRAME)
-let yin: ReturnType<typeof createYin> | null = null
+const mic = new MicInput()
+const frame = new Float32Array(mic.frameSize)
+let detector: NoteDetector | null = null
 let running = false
+let lastInfo: FrameInfo | null = null
 
-// ---- Tine strip (physical left-to-right order, never mirrored) -------------
-const tineEls = new Map<number, HTMLElement>()
-const maxDist = Math.max(...tuning.tines.map((t) => Math.abs(t.pos - 9)))
-for (const t of tuning.tines) {
-  const el = document.createElement('div')
-  el.className = 'tine'
-  // Centre tine is the longest; length falls off toward the edges.
-  const len = 100 - (Math.abs(t.pos - 9) / maxDist) * 45
-  el.style.setProperty('--len', `${len}%`)
-  el.style.setProperty('--c', DEGREE_COLORS[t.degree])
-  el.innerHTML = `<b>${degreeLabel(t)}</b><i>${t.note.replace(/\d/, '')}</i>`
-  $('tines').appendChild(el)
-  tineEls.set(t.pos, el)
+const strip = new TineStrip($('strip'), tuning)
+const debug = new DebugPanel($('debug'), tuning)
+
+// ---- Notes ------------------------------------------------------------------
+let count = 0
+const recent: NoteEvent[] = []
+
+function onNote(n: NoteEvent) {
+  count++
+  recent.push(n)
+  if (recent.length > 40) recent.shift()
+  debug.note(n)
+  strip.flash(n.tine)
+
+  const big = $('big')
+  big.textContent = degreeLabel(n.tine)
+  big.style.color = DEGREE_COLORS[n.tine.degree]
+  big.classList.remove('pop')
+  void big.offsetWidth
+  big.classList.add('pop')
+  $('note-name').textContent = `${n.tine.note} · לשונית ${n.tine.pos}`
+  const cents = $('cents')
+  if (n.cents === null) {
+    cents.textContent = ''
+  } else {
+    const c = Math.round(n.cents)
+    cents.textContent = `${c > 0 ? '+' : ''}${c}¢`
+    cents.dataset.state = Math.abs(c) <= 10 ? 'ok' : 'off'
+  }
+  $('count').textContent = String(count)
+
+  const chip = document.createElement('span')
+  chip.className = 'chip'
+  chip.textContent = degreeLabel(n.tine)
+  chip.style.setProperty('--c', DEGREE_COLORS[n.tine.degree])
+  const row = $('recent')
+  row.appendChild(chip)
+  while (row.children.length > 24) row.firstChild!.remove()
+
+  check.onNote(n.tine)
 }
 
-// ---- Pitch trace ------------------------------------------------------------
-const trace = $<HTMLCanvasElement>('trace')
-const tctx = trace.getContext('2d')!
-const HISTORY = 180
-const TRACE_LEFT = 42
-const history: { hz: number | null; tine: Tine | null }[] = []
+$('reset').addEventListener('click', () => {
+  count = 0
+  recent.length = 0
+  $('count').textContent = '0'
+  $('recent').innerHTML = ''
+})
 
-function yForHz(hz: number, h: number) {
-  const lo = Math.log2(240)
-  const hi = Math.log2(1400)
-  return h - ((Math.log2(hz) - lo) / (hi - lo)) * h
-}
+// ---- 17-tine check: the Phase 1 acceptance test ------------------------------
+const check = (() => {
+  const order = [...tuning.tines].sort((a, b) => a.pos - b.pos)
+  let idx = -1
+  let right = 0
+  const errors: string[] = []
 
-function drawTrace() {
-  const dpr = window.devicePixelRatio || 1
-  const w = trace.clientWidth
-  const h = trace.clientHeight
-  if (trace.width !== w * dpr) {
-    trace.width = w * dpr
-    trace.height = h * dpr
+  function target(): Tine | null {
+    return idx >= 0 && idx < order.length ? order[idx] : null
   }
-  tctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-  tctx.clearRect(0, 0, w, h)
-  tctx.font = '9px system-ui'
-  // Semitone neighbours (E/F, B/C) sit close together: stagger their labels.
-  let prevY = Infinity
-  let col = 0
-  for (const t of [...tuning.tines].sort((a, b) => a.midi - b.midi)) {
-    const y = yForHz(midiToHz(t.midi), h)
-    col = prevY - y < 9 ? 1 - col : 0
-    prevY = y
-    tctx.strokeStyle = 'rgba(160,140,255,0.12)'
-    tctx.beginPath()
-    tctx.moveTo(TRACE_LEFT, y)
-    tctx.lineTo(w, y)
-    tctx.stroke()
-    tctx.fillStyle = DEGREE_COLORS[t.degree]
-    tctx.fillText(t.note, col * 20, y + 3)
+
+  function show() {
+    const t = target()
+    $('check-actions').hidden = !t
+    $('check-btn').hidden = !!t
+    if (t) {
+      strip.mark(t, 'target')
+      $('check-msg').innerHTML = `נגן את הלשונית המסומנת: <b style="color:${DEGREE_COLORS[t.degree]}">${degreeLabel(t)} (${t.note})</b> · ${idx + 1}/${order.length}`
+    }
+    $('check-errors').innerHTML = errors.map((e) => `<li>${e}</li>`).join('')
   }
-  history.forEach((p, i) => {
-    if (!p.hz) return
-    const x = TRACE_LEFT + (i / HISTORY) * (w - TRACE_LEFT)
-    const y = yForHz(p.hz, h)
-    tctx.fillStyle = p.tine ? DEGREE_COLORS[p.tine.degree] : '#888'
-    tctx.shadowColor = tctx.fillStyle
-    tctx.shadowBlur = p.tine ? 8 : 0
-    tctx.beginPath()
-    tctx.arc(x, y, 2.2, 0, Math.PI * 2)
-    tctx.fill()
+
+  function advance(ok: boolean, heard: Tine | null) {
+    const t = target()!
+    strip.mark(t, ok ? 'ok' : 'bad')
+    if (ok) right++
+    else errors.push(`לשונית ${t.pos} (${t.note}): ${heard ? `זוהה ${heard.note}` : 'לא זוהה'}`)
+    idx++
+    if (idx >= order.length) {
+      const pct = Math.round((right / order.length) * 100)
+      $('check-msg').innerHTML = `<b>${right}/${order.length} זוהו נכון (${pct}%)</b> ${pct >= 95 ? '🎉' : '· שלח לי את הדוח מתוך מצב דיבאג'}`
+      $('check-btn').textContent = 'בדיקה חוזרת'
+      idx = -1
+    }
+    show()
+  }
+
+  $('check-btn').addEventListener('click', () => {
+    strip.clearMarks()
+    idx = 0
+    right = 0
+    errors.length = 0
+    show()
   })
-  tctx.shadowBlur = 0
-}
+  $('check-skip').addEventListener('click', () => target() && advance(false, null))
+  $('check-stop').addEventListener('click', () => {
+    idx = -1
+    strip.clearMarks()
+    $('check-msg').textContent = 'נגן כל לשונית פעם אחת, משמאל לימין, ובדוק שהיא מזוהה נכון.'
+    $('check-btn').textContent = 'התחל בדיקה'
+    show()
+  })
+
+  return {
+    onNote(tine: Tine) {
+      const t = target()
+      if (t) advance(tine === t, tine)
+    },
+    summary() {
+      return idx >= 0 ? `check in progress ${idx}/${order.length}` : `check ${right}/${order.length}; ${errors.join('; ') || 'no errors'}`
+    },
+  }
+})()
+
+// ---- Debug ------------------------------------------------------------------
+$('debug-toggle').addEventListener('click', () => {
+  $('debug').hidden = !$('debug').hidden
+})
+
+$('copy-report').addEventListener('click', async () => {
+  if (!lastInfo) return
+  const text = [
+    'Kalimba Coach report',
+    navigator.userAgent,
+    debug.report(lastInfo, 0, mic.settings, mic.sampleRate),
+    `notes (${count}): ${recent.map((n) => `${n.tine.note}${n.cents === null ? '' : `${n.cents >= 0 ? '+' : ''}${n.cents.toFixed(0)}`}`).join(' ')}`,
+    check.summary(),
+  ].join('\n')
+  try {
+    await navigator.clipboard.writeText(text)
+    $('copy-report').textContent = '✓ הועתק'
+  } catch {
+    $('copy-report').textContent = 'ההעתקה נכשלה'
+  }
+  setTimeout(() => ($('copy-report').textContent = '📋 העתק דוח'), 2000)
+})
 
 // ---- Analysis loop ----------------------------------------------------------
-let lastShown = 0
-let heldTine: Tine | null = null
-let heldUntil = 0
+let lastFrame = 0
 
 function tick(now: number) {
   if (!running) return
   requestAnimationFrame(tick)
-  if (!mic.read(frame) || !yin) return
-
-  const db = rmsDb(frame)
-  const gated = db < GATE_DB
-  const est = gated ? { hz: null, confidence: 0 } : yin(frame)
-  const confident = est.hz !== null && est.confidence >= MIN_CONFIDENCE
-  const snapped = confident ? snapToTine(est.hz!, tuning.tines) : null
-
-  history.push({ hz: confident ? est.hz : null, tine: snapped?.tine ?? null })
-  if (history.length > HISTORY) history.shift()
-
-  if (snapped) {
-    heldTine = snapped.tine
-    heldUntil = now + 400
-  }
-
-  // Meters every frame, text ~15×/s so it is readable.
-  const levelPct = Math.max(0, Math.min(100, ((db + 80) / 80) * 100))
-  $('meter-fill').style.width = `${levelPct}%`
-  $('conf-fill').style.width = `${Math.round(est.confidence * 100)}%`
-  for (const [pos, el] of tineEls) el.classList.toggle('lit', !!heldTine && now < heldUntil && heldTine.pos === pos)
-  drawTrace()
-
-  if (now - lastShown < 66) return
-  lastShown = now
-  $('db').textContent = Number.isFinite(db) ? `${db.toFixed(0)} dB` : '−∞'
-  $('conf').textContent = `${Math.round(est.confidence * 100)}%`
-  if (confident) {
-    $('hz').textContent = est.hz!.toFixed(1)
-    if (snapped) {
-      $('tine-big').textContent = degreeLabel(snapped.tine)
-      $('tine-big').style.color = DEGREE_COLORS[snapped.tine.degree]
-      $('note-name').textContent = `${snapped.tine.note} · לשונית ${snapped.tine.pos}`
-      const c = Math.round(snapped.cents)
-      $('cents').textContent = `${c > 0 ? '+' : ''}${c}¢`
-      $('cents').dataset.state = Math.abs(c) <= 10 ? 'ok' : 'off'
-    } else {
-      $('tine-big').textContent = '?'
-      $('tine-big').style.color = ''
-      $('note-name').textContent = 'לא תו של הקלימבה'
-      $('cents').textContent = ''
-    }
-  }
-  const s = mic.settings
-  $('debug').textContent = [
-    `sampleRate      ${mic.sampleRate}`,
-    `context         ${mic.ctx?.state}`,
-    `echoCancel      ${s?.echoCancellation}`,
-    `noiseSuppress   ${s?.noiseSuppression}`,
-    `autoGain        ${s?.autoGainControl}`,
-    `level           ${db.toFixed(1)} dBFS (gate ${GATE_DB})`,
-    `raw hz          ${est.hz?.toFixed(2) ?? '–'}`,
-    `confidence      ${est.confidence.toFixed(3)}`,
-    `nearest         ${snapped ? `${snapped.tine.note} ${snapped.cents.toFixed(1)}¢` : '–'}`,
-  ].join('\n')
+  if (!detector || !mic.read(frame)) return
+  const { info, notes } = detector.process(frame, now)
+  lastInfo = info
+  for (const n of notes) onNote(n)
+  debug.update(info, now, lastFrame ? now - lastFrame : 0, mic.settings, mic.sampleRate)
+  lastFrame = now
 }
 
 // ---- Start / errors / background -------------------------------------------
@@ -180,7 +192,11 @@ async function start() {
     showError(e)
     return
   }
-  yin = createYin(FRAME, { sampleRate: mic.sampleRate, minHz: MIN_HZ, maxHz: MAX_HZ, threshold: 0.15 })
+  if (!detector || detector.config.sampleRate !== mic.sampleRate) {
+    detector = new NoteDetector({ sampleRate: mic.sampleRate, tines: tuning.tines })
+  } else {
+    detector.reset()
+  }
   $('start-screen').hidden = true
   $('live').hidden = false
   $('resume').hidden = true
@@ -202,5 +218,6 @@ document.addEventListener('visibilitychange', async () => {
   } catch {
     /* needs a gesture */
   }
+  detector?.reset()
   if (!mic.isLive) $('resume').hidden = false
 })
