@@ -2,7 +2,7 @@ import { esc, html, type Screen } from '../app/context'
 import { keys, load, save } from '../app/storage'
 import { getFavorites, getHistory, toggleFavorite } from '../play/history'
 import { stars } from '../play/waitSession'
-import { DIFFICULTY_LABEL, type Song } from '../songs/song'
+import { DIFFICULTY_LABEL, atLevel, songLevels, type Song } from '../songs/song'
 import { allSongs, makeBackup, restoreBackup } from '../songs/store'
 
 type Filter = 'all' | 'easy' | 'medium' | 'hard' | 'fav' | 'mine'
@@ -44,7 +44,7 @@ export const songs: Screen = (root, app) => {
   function matches(s: Song, favs: Set<string>) {
     if (filter === 'fav' && !favs.has(s.id)) return false
     if (filter === 'mine' && s.builtIn) return false
-    if ((filter === 'easy' || filter === 'medium' || filter === 'hard') && s.difficulty !== filter) return false
+    if ((filter === 'easy' || filter === 'medium' || filter === 'hard') && !songLevels(s).some((l) => l.difficulty === filter)) return false
     if (!query) return true
     const hay = [s.title, s.titleHe, s.artist, s.category, ...s.tags].join(' ').toLowerCase()
     return hay.includes(query.toLowerCase())
@@ -56,8 +56,14 @@ export const songs: Screen = (root, app) => {
     $('sg-list').innerHTML = list.length
       ? list
           .map((s) => {
-            const h = getHistory(s.id)
-            const best = Math.max(h?.best.wait ?? 0, h?.best.tempo ?? 0)
+            const levels = songLevels(s)
+            const best = Math.max(
+              0,
+              ...levels.map((l) => {
+                const h = getHistory(atLevel(s, l.difficulty).id)
+                return Math.max(h?.best.wait ?? 0, h?.best.tempo ?? 0)
+              }),
+            )
             const st = stars(best)
             return html`
               <a class="song-item" href="#/play/${encodeURIComponent(s.id)}">
@@ -66,7 +72,7 @@ export const songs: Screen = (root, app) => {
                   <small dir="auto">${esc(s.titleHe ? s.title : s.artist ?? '')}${s.titleHe && s.artist ? ` · ${esc(s.artist)}` : ''}</small>
                 </div>
                 <div class="song-side">
-                  <span class="badge badge-${s.difficulty}">${DIFFICULTY_LABEL[s.difficulty]}</span>
+                  <span class="badges">${levels.map((l) => `<span class="badge badge-${l.difficulty}">${DIFFICULTY_LABEL[l.difficulty]}</span>`).join('')}</span>
                   <span class="stars" aria-label="${st} כוכבים">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></span>
                 </div>
                  <button class="fav${favs.has(s.id) ? ' on' : ''}" data-id="${esc(s.id)}" aria-label="מועדף">${favs.has(s.id) ? '★' : '☆'}</button>

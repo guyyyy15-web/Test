@@ -4,7 +4,7 @@ import { degreeLabel, type Tine } from '../config/tunings'
 import { getHistory, recordPlay } from '../play/history'
 import { TempoSession, type Timing } from '../play/tempoSession'
 import { WaitSession, stars, type Summary } from '../play/waitSession'
-import { DIFFICULTY_LABEL, songNotes, type SongNote } from '../songs/song'
+import { DIFFICULTY_LABEL, atLevel, songLevels, songNotes, type SongNote } from '../songs/song'
 import { deleteUserSong, findSong } from '../songs/store'
 import { DEGREE_COLORS } from '../theme'
 import { Highway } from '../ui/highway'
@@ -16,8 +16,10 @@ type Mode = 'wait' | 'tempo'
 const DEFAULT_LATENCY_MS = 40
 
 export const play: Screen = (root, app, params) => {
-  const song = findSong(decodeURIComponent(params[0] ?? ''))
-  if (!song) {
+  const base = findSong(decodeURIComponent(params[0] ?? ''))
+  // #/play/<id>/<difficulty> picks one arrangement of a song with levels.
+  const song = base && atLevel(base, params[1])
+  if (!base || !song) {
     root.innerHTML = `<div class="card center"><p>השיר לא נמצא.</p><a class="chip-btn" href="#/songs">לרשימת השירים</a></div>`
     return () => {}
   }
@@ -32,6 +34,7 @@ export const play: Screen = (root, app, params) => {
     stop = () => {}
     const notes = songNotes(song!)
     const h = getHistory(song!.id)
+    const levels = songLevels(base!)
     const pct = (v?: number) => (v === undefined ? '–' : `${Math.round(v * 100)}%`)
     const tempoPct = load('tempoPct', 80)
     app.engine.headphones = load('headphones', false)
@@ -43,8 +46,10 @@ export const play: Screen = (root, app, params) => {
           <span class="badge badge-${song!.difficulty}">${DIFFICULTY_LABEL[song!.difficulty]}</span>
           <span class="hint">${notes.length} תווים · ${song!.bpm} BPM</span>
         </div>
+        ${levels.length > 1 ? `<div class="levels">${levels.map((l) => `<a class="level${l.difficulty === song!.difficulty ? ' on' : ''} badge-${l.difficulty}" href="#/play/${encodeURIComponent(base!.id)}/${l.difficulty}">${DIFFICULTY_LABEL[l.difficulty]}</a>`).join('')}</div>` : ''}
+        ${song!.levelNote ? `<p class="hint">${esc(song!.levelNote)}</p>` : ''}
         ${h ? `<p class="hint">שיא: המתנה ${pct(h.best.wait)} · טמפו ${pct(h.best.tempo)} · ${h.plays} נגינות</p>` : ''}
-        ${song!.builtIn ? '' : `<div class="row"><a class="chip-btn" href="#/import/${encodeURIComponent(song!.id)}">✎ עריכה</a><button id="s-del" class="chip-btn">🗑 מחיקה</button></div>`}
+        ${base!.builtIn ? '' : `<div class="row"><a class="chip-btn" href="#/import/${encodeURIComponent(base!.id)}">✎ עריכה</a><button id="s-del" class="chip-btn">🗑 מחיקה</button></div>`}
       </div>
       <button class="mode-btn" data-mode="wait"><span>⏸</span><b>מצב המתנה</b><small>השיר מחכה לך בכל תו. הכי טוב ללמידה.</small></button>
       <button class="mode-btn" data-mode="tempo"><span>▶</span><b>מצב טמפו</b><small>התווים זורמים בקצב, וכל תו מקבל ניקוד על דיוק ותזמון.</small></button>
@@ -72,8 +77,8 @@ export const play: Screen = (root, app, params) => {
       save('headphones', el.checked)
     })
     root.querySelector('#s-del')?.addEventListener('click', () => {
-      if (!confirm(`למחוק את "${song!.title}"?`)) return
-      deleteUserSong(song!.id)
+      if (!confirm(`למחוק את "${base!.title}"?`)) return
+      deleteUserSong(base!.id)
       app.go('songs')
     })
     root.querySelectorAll<HTMLElement>('.mode-btn').forEach((b) =>

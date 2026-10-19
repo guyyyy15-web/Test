@@ -20,7 +20,19 @@ export interface Song {
   lyrics?: string[]
   /** Semitones to shift the tab to fit the instrument. */
   shift?: number
+  /** Other arrangements of the same song, at other difficulties. */
+  levels?: SongLevel[]
+  /** What this arrangement is, e.g. "the full piece, an octave up". */
+  levelNote?: string
   builtIn?: boolean
+}
+
+export interface SongLevel {
+  difficulty: Difficulty
+  tab: string
+  bpm?: number
+  meter?: number
+  note?: string
 }
 
 export interface SongNote {
@@ -41,6 +53,34 @@ export function songNotes(song: Song): SongNote[] {
     beat += n.beats
   }
   return out
+}
+
+const ORDER: Difficulty[] = ['easy', 'medium', 'hard']
+
+/** Every arrangement of a song, easiest first; the song's own tab is one of them. */
+export function songLevels(song: Song): SongLevel[] {
+  const own: SongLevel = { difficulty: song.difficulty, tab: song.tab, bpm: song.bpm, meter: song.meter, note: song.levelNote }
+  return [own, ...(song.levels ?? [])].sort((a, b) => ORDER.indexOf(a.difficulty) - ORDER.indexOf(b.difficulty))
+}
+
+/**
+ * The song at one difficulty, as a plain Song the game can play. Its id is
+ * the history key: the song's own level keeps the bare id (so scores from
+ * before levels existed still count), other levels get "id@difficulty".
+ */
+export function atLevel(song: Song, difficulty?: string): Song {
+  const level = song.levels?.find((l) => l.difficulty === difficulty)
+  if (!level) return song
+  return {
+    ...song,
+    id: `${song.id}@${level.difficulty}`,
+    difficulty: level.difficulty,
+    tab: level.tab,
+    bpm: level.bpm ?? song.bpm,
+    meter: level.meter ?? song.meter,
+    levelNote: level.note,
+    levels: undefined,
+  }
 }
 
 export const DIFFICULTY_LABEL: Record<Difficulty, string> = { easy: 'קל', medium: 'בינוני', hard: 'מאתגר' }

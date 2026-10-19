@@ -517,3 +517,17 @@ a.chip-btn { text-decoration: none; display: inline-flex; align-items: center; }
   z-index: 20;
   line-height: 1.5;
 }
+
+.badges { display: flex; gap: 3px; }
+.levels { display: flex; gap: 6px; margin: 10px 0 4px; }
+.level {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 2px solid transparent;
+  opacity: 0.55;
+}
+.level.on { opacity: 1; border-color: currentColor; }
