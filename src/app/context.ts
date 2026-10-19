@@ -17,3 +17,8 @@ export type Screen = (root: HTMLElement, app: App, params: string[]) => () => vo
 export function html(strings: TemplateStringsArray, ...values: unknown[]) {
   return strings.reduce((out, s, i) => out + s + (i < values.length ? String(values[i]) : ''), '')
 }
+
+/** Escape text for use inside HTML (user song titles, imported backups). */
+export function esc(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
+}

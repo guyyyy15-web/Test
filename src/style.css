@@ -474,3 +474,30 @@ a.chip-btn { text-decoration: none; display: inline-flex; align-items: center; }
 .tips { margin: 8px 0 0; padding-inline-start: 18px; line-height: 1.6; color: var(--muted); }
 .tips b { color: var(--text); }
 .space { justify-content: space-between; }
+
+/* ---- Forms / import ---- */
+.form { display: flex; flex-direction: column; gap: 12px; }
+.form label { display: flex; flex-direction: column; gap: 4px; font-weight: 600; font-size: 14px; }
+.form label small { font-weight: 400; color: var(--muted); }
+.form input, .form select, .form textarea {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--card-border);
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.form textarea { resize: vertical; }
+#f-tab { font-family: ui-monospace, Menlo, monospace; }
+.grow { flex: 1; min-width: 0; }
+.help summary { color: var(--accent2); cursor: pointer; }
+.preview { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.phrase { display: flex; flex-wrap: wrap; gap: 3px; }
+.chip.bad { --c: var(--bad); background: rgba(255, 92, 108, 0.25); }
+.chip.rest { --c: var(--muted); }
+.error-text { color: var(--bad); text-align: center; min-height: 1em; margin: 0; }
+.file-btn { cursor: pointer; }

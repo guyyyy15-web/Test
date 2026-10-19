@@ -1,11 +1,11 @@
-import { html, type App, type Screen } from '../app/context'
+import { esc, html, type App, type Screen } from '../app/context'
 import { load, save } from '../app/storage'
 import { degreeLabel, type Tine } from '../config/tunings'
 import { getHistory, recordPlay } from '../play/history'
 import { TempoSession, type Timing } from '../play/tempoSession'
 import { WaitSession, stars, type Summary } from '../play/waitSession'
 import { DIFFICULTY_LABEL, songNotes, type SongNote } from '../songs/song'
-import { findSong } from '../songs/store'
+import { deleteUserSong, findSong } from '../songs/store'
 import { DEGREE_COLORS } from '../theme'
 import { Highway } from '../ui/highway'
 import { KalimbaView } from '../ui/kalimba'
@@ -37,13 +37,14 @@ export const play: Screen = (root, app, params) => {
     app.engine.headphones = load('headphones', false)
     root.innerHTML = html`
       <div class="card song-head">
-        <h2>${song!.titleHe ?? song!.title}</h2>
-        <p class="hint" dir="auto">${song!.titleHe ? song!.title : ''}${song!.artist ? ` · ${song!.artist}` : ''}</p>
+        <h2 dir="auto">${esc(song!.titleHe ?? song!.title)}</h2>
+        <p class="hint" dir="auto">${esc(song!.titleHe ? song!.title : '')}${song!.artist ? ` · ${esc(song!.artist)}` : ''}</p>
         <div class="row">
           <span class="badge badge-${song!.difficulty}">${DIFFICULTY_LABEL[song!.difficulty]}</span>
           <span class="hint">${notes.length} תווים · ${song!.bpm} BPM</span>
         </div>
         ${h ? `<p class="hint">שיא: המתנה ${pct(h.best.wait)} · טמפו ${pct(h.best.tempo)} · ${h.plays} נגינות</p>` : ''}
+        ${song!.builtIn ? '' : `<div class="row"><a class="chip-btn" href="#/import/${encodeURIComponent(song!.id)}">✎ עריכה</a><button id="s-del" class="chip-btn">🗑 מחיקה</button></div>`}
       </div>
       <button class="mode-btn" data-mode="wait"><span>⏸</span><b>מצב המתנה</b><small>השיר מחכה לך בכל תו. הכי טוב ללמידה.</small></button>
       <button class="mode-btn" data-mode="tempo"><span>▶</span><b>מצב טמפו</b><small>התווים זורמים בקצב, וכל תו מקבל ניקוד על דיוק ותזמון.</small></button>
@@ -69,6 +70,11 @@ export const play: Screen = (root, app, params) => {
     bind('opt-phones', (el) => {
       app.engine.headphones = el.checked
       save('headphones', el.checked)
+    })
+    root.querySelector('#s-del')?.addEventListener('click', () => {
+      if (!confirm(`למחוק את "${song!.title}"?`)) return
+      deleteUserSong(song!.id)
+      app.go('songs')
     })
     root.querySelectorAll<HTMLElement>('.mode-btn').forEach((b) =>
       b.addEventListener('click', async () => {

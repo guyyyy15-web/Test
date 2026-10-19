@@ -16,3 +16,14 @@ export function save(key: string, value: unknown) {
     /* storage unavailable: settings just won't persist */
   }
 }
+
+/** Keys are namespaced; backups name them without the prefix. */
+export function keys(prefix: string): string[] {
+  try {
+    return Object.keys(localStorage)
+      .filter((k) => k.startsWith(`kc:${prefix}`))
+      .map((k) => k.slice(3))
+  } catch {
+    return []
+  }
+}

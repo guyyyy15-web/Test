@@ -5,10 +5,10 @@ import type { MicError } from './audio/mic'
 import { K17_C } from './config/tunings'
 import { free } from './screens/free'
 import { home } from './screens/home'
+import { importSong } from './screens/importSong'
 import { lab } from './screens/lab'
 import { play } from './screens/play'
 import { songs } from './screens/songs'
-import { soon } from './screens/soon'
 import { tuner } from './screens/tuner'
 
 const tuning = K17_C
@@ -21,7 +21,7 @@ const routes: Record<string, Screen> = {
   lab,
   songs,
   play,
-  import: soon('הוספת שיר'),
+  import: importSong,
   tuner,
 }
 

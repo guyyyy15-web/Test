@@ -1,9 +1,9 @@
-import { html, type Screen } from '../app/context'
-import { load, save } from '../app/storage'
+import { esc, html, type Screen } from '../app/context'
+import { keys, load, save } from '../app/storage'
 import { getFavorites, getHistory, toggleFavorite } from '../play/history'
 import { stars } from '../play/waitSession'
 import { DIFFICULTY_LABEL, type Song } from '../songs/song'
-import { allSongs } from '../songs/store'
+import { allSongs, makeBackup, restoreBackup } from '../songs/store'
 
 type Filter = 'all' | 'easy' | 'medium' | 'hard' | 'fav' | 'mine'
 
@@ -25,6 +25,15 @@ export const songs: Screen = (root, app) => {
     <div id="sg-filters" class="filters"></div>
     <div id="sg-list" class="song-list"></div>
     <a class="chip-btn primary center-btn" href="#/import">＋ הוסף שיר משלך</a>
+    <div class="card">
+      <b>גיבוי</b>
+      <p class="hint">השירים שהוספת, השיאים, המועדפים והכיול נשמרים רק במכשיר הזה. כדי להעביר אותם למכשיר אחר, ייצא קובץ וייבא אותו שם.</p>
+      <div class="row">
+        <button id="sg-export" class="chip-btn">⬇ ייצוא</button>
+        <label class="chip-btn file-btn">⬆ ייבוא<input id="sg-import" type="file" accept="application/json,.json" hidden /></label>
+      </div>
+      <p id="sg-backup-msg" class="hint"></p>
+    </div>
   `
   const $ = (id: string) => root.querySelector<HTMLElement>(`#${id}`)!
 
@@ -53,14 +62,14 @@ export const songs: Screen = (root, app) => {
             return html`
               <a class="song-item" href="#/play/${encodeURIComponent(s.id)}">
                 <div class="song-main">
-                  <b>${s.titleHe ?? s.title}</b>
-                  <small dir="auto">${s.titleHe ? s.title : s.artist ?? ''}${s.titleHe && s.artist ? ` · ${s.artist}` : ''}</small>
+                  <b dir="auto">${esc(s.titleHe ?? s.title)}</b>
+                  <small dir="auto">${esc(s.titleHe ? s.title : s.artist ?? '')}${s.titleHe && s.artist ? ` · ${esc(s.artist)}` : ''}</small>
                 </div>
                 <div class="song-side">
                   <span class="badge badge-${s.difficulty}">${DIFFICULTY_LABEL[s.difficulty]}</span>
                   <span class="stars" aria-label="${st} כוכבים">${'★'.repeat(st)}<i>${'★'.repeat(3 - st)}</i></span>
                 </div>
-                <button class="fav${favs.has(s.id) ? ' on' : ''}" data-id="${s.id}" aria-label="מועדף">${favs.has(s.id) ? '★' : '☆'}</button>
+                 <button class="fav${favs.has(s.id) ? ' on' : ''}" data-id="${esc(s.id)}" aria-label="מועדף">${favs.has(s.id) ? '★' : '☆'}</button>
               </a>`
           })
           .join('')
@@ -85,6 +94,26 @@ export const songs: Screen = (root, app) => {
     e.preventDefault()
     toggleFavorite(btn.dataset.id!)
     renderList()
+  })
+
+  $('sg-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(makeBackup(keys('calibration:')), null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `kalimba-coach-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  })
+  $('sg-import').addEventListener('change', async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    try {
+      const { songs } = restoreBackup(JSON.parse(await file.text()))
+      $('sg-backup-msg').textContent = `✓ יובאו ${songs} שירים.`
+      renderList()
+    } catch {
+      $('sg-backup-msg').textContent = 'הקובץ לא נראה כמו גיבוי של Kalimba Coach.'
+    }
   })
 
   renderFilters()
