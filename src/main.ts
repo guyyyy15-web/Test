@@ -96,3 +96,10 @@ document.addEventListener('visibilitychange', async () => {
     gateWaiters.push(() => {})
   }
 })
+
+// Offline support (production builds only; dev reloads would fight it).
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
+    /* offline mode unavailable; the app still works online */
+  })
+}
