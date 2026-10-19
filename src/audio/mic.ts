@@ -39,6 +39,11 @@ export class MicInput {
     if (!window.isSecureContext) throw new MicError('insecure', 'Not a secure context')
     if (!navigator.mediaDevices?.getUserMedia) throw new MicError('unsupported', 'getUserMedia missing')
 
+    // Safari 16.4+: record and play together. This category also keeps the
+    // guide tones audible when the ringer switch is on silent.
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession
+    if (session) session.type = 'play-and-record'
+
     // Create or resume the context first, synchronously inside the tap.
     if (!this.ctx || this.ctx.state === 'closed') this.ctx = new AudioContext()
     const resumed = this.ctx.resume()

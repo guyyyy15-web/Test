@@ -10,73 +10,27 @@
   </head>
   <body>
     <main id="app">
-      <header class="brand">
-        <h1>Kalimba <span>Coach</span></h1>
-        <p class="phase">שלב 1 · זיהוי תווים</p>
+      <header class="topbar">
+        <a href="#/" id="back" class="back" hidden aria-label="חזרה">→</a>
+        <h1 class="brand"><a href="#/">Kalimba <span>Coach</span></a></h1>
+        <span id="screen-title" class="screen-title"></span>
       </header>
-
-      <section id="start-screen" class="card center">
-        <p>נגן על הקלימבה וראה אם הטלפון מזהה כל תו.</p>
-        <button id="start" class="big-btn">🎤 התחל</button>
-        <p class="hint">בלחיצה תתבקש לאשר גישה למיקרופון.</p>
-      </section>
-
-      <section id="error" class="card error" hidden></section>
-
-      <section id="live" hidden>
-        <div class="card readout">
-          <div id="big" class="tine-big">–</div>
-          <div class="note-line">
-            <span id="note-name">נגן תו כלשהו</span>
-            <span id="cents" class="cents"></span>
-          </div>
-        </div>
-
-        <div class="card">
-          <div id="strip"></div>
-          <div class="count-row">
-            <span>תווים שזוהו: <b id="count">0</b></span>
-            <button id="reset" class="chip-btn">↺ אפס</button>
-          </div>
-          <div id="recent" class="recent" dir="ltr"></div>
-        </div>
-
-        <div class="card" id="check">
-          <div class="check-head">
-            <div>
-              <b>בדיקת 17 לשוניות</b>
-              <p id="check-msg" class="hint">נגן כל לשונית פעם אחת, משמאל לימין, ובדוק שהיא מזוהה נכון.</p>
-            </div>
-            <button id="check-btn" class="chip-btn primary">התחל בדיקה</button>
-          </div>
-          <div id="check-actions" hidden>
-            <button id="check-skip" class="chip-btn">לא זוהה · דלג</button>
-            <button id="check-stop" class="chip-btn">עצור</button>
-          </div>
-          <ul id="check-errors" class="check-errors" dir="rtl"></ul>
-        </div>
-
-        <button id="debug-toggle" class="chip-btn ghost">🐞 מצב דיבאג</button>
-
-        <div id="debug" class="card debug" hidden>
-          <div class="meter-label"><span>עוצמה <small>(קו = סף, נקודה = רעש רקע)</small></span></div>
-          <div class="meter" dir="ltr"><div class="lvl-fill"></div><div class="lvl-gate"></div><div class="lvl-floor"></div></div>
-          <div class="meter-label"><span>תדרים גבוהים <small>(מכת אצבע)</small></span><span class="onset-dot"></span></div>
-          <div class="meter" dir="ltr"><div class="hf-fill"></div></div>
-          <div class="meter-label"><span>ביטחון YIN</span></div>
-          <div class="meter" dir="ltr"><div class="conf-fill"></div></div>
-          <div class="meter-label"><span>עוצמה לכל לשונית</span></div>
-          <div class="sal-bars"></div>
-          <canvas class="trace" dir="ltr"></canvas>
-          <pre dir="ltr"></pre>
-          <button id="copy-report" class="chip-btn primary">📋 העתק דוח</button>
-        </div>
-      </section>
-
-      <div id="resume" class="overlay" hidden>
-        <button class="big-btn">▶ המשך להאזין</button>
-      </div>
+      <div id="screen"></div>
     </main>
+
+    <div id="gate" class="overlay" hidden>
+      <div class="card center gate-card">
+        <p>כדי לשמוע אותך ולנגן צלילים, צריך הקשה אחת.</p>
+        <button id="gate-btn" class="big-btn">🎤 התחל</button>
+        <p class="hint">בפעם הראשונה תתבקש לאשר גישה למיקרופון.</p>
+      </div>
+    </div>
+    <div id="mic-error" class="overlay" hidden>
+      <div class="card error">
+        <div id="mic-error-text"></div>
+        <button id="mic-error-ok" class="chip-btn primary">הבנתי</button>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
