@@ -432,3 +432,8 @@ a.chip-btn { text-decoration: none; display: inline-flex; align-items: center; }
 .stats small { color: var(--muted); }
 .center-row { justify-content: center; }
 .confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+
+.slider { display: flex; flex-direction: column; gap: 6px; }
+.slider input { width: 100%; accent-color: var(--accent); }
+.slider small { color: var(--muted); }
+.countin { font-size: 30px; font-weight: 800; color: var(--accent); text-shadow: var(--glow); }

@@ -67,14 +67,18 @@ export class KalimbaSynth {
     fund.onended = () => voice.disconnect()
   }
 
-  /** A short metronome tick; `accent` for the first beat of a bar. */
+  /**
+   * A short metronome tick; `accent` for the first beat of a bar. Pitched
+   * well above the highest tine (E6 is 1319 Hz) so the mic never takes it
+   * for a note.
+   */
   tick(when = this.ctx.currentTime, accent = false) {
     const ctx = this.ctx
     const osc = ctx.createOscillator()
-    osc.frequency.value = accent ? 1760 : 1320
+    osc.frequency.value = accent ? 3200 : 2600
     const g = ctx.createGain()
-    g.gain.setValueAtTime(0.25, when)
-    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.05)
+    g.gain.setValueAtTime(accent ? 0.22 : 0.14, when)
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.04)
     osc.connect(g).connect(this.out)
     osc.start(when)
     osc.stop(when + 0.06)

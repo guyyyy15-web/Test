@@ -68,7 +68,7 @@ export class Highway {
     return this.byMidi.get(midi)
   }
 
-  burst(midi: number, text: string) {
+  burst(midi: number, text = '') {
     const t = this.byMidi.get(midi)
     if (!t) return
     const x = this.lanes.get(t.pos) ?? 0
@@ -78,7 +78,13 @@ export class Highway {
       const v = 60 + Math.random() * 160
       this.particles.push({ x, y: this.hitY, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 1, color })
     }
-    this.popups.push({ x, y: this.hitY - 30, text, color, life: 1 })
+    if (text) this.popups.push({ x, y: this.hitY - 30, text, color, life: 1 })
+  }
+
+  /** Floating text over a tine's lane. */
+  popup(midi: number, text: string, color: string) {
+    const t = this.byMidi.get(midi)
+    if (t) this.popups.push({ x: this.lanes.get(t.pos) ?? 0, y: this.hitY - 30, text, color, life: 1 })
   }
 
   wrong(played: number, text: string) {

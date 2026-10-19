@@ -12,6 +12,8 @@ export interface Song {
   category: string
   tags: string[]
   bpm: number
+  /** Beats per bar (default 4). */
+  meter?: number
   /** The tab, in number or letter notation; one line per phrase. */
   tab: string
   /** Lyrics per phrase, pasted by the user for their own imported songs. */
