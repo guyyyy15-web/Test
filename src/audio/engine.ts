@@ -1,6 +1,7 @@
 // One place that owns the AudioContext, the mic, the note detector and the
 // synth, and runs the analysis loop. Screens subscribe to notes and frames.
 
+import { load, save } from '../app/storage'
 import type { Tuning } from '../config/tunings'
 import { NoteDetector, type FrameInfo, type NoteEvent } from '../detect/detector'
 import { MicError, MicInput } from './mic'
@@ -46,7 +47,7 @@ export class AudioEngine {
     if (ctx && !this.synth) this.synth = new KalimbaSynth(ctx)
     if (this.micError) return
     if (!this.detector || this.detector.config.sampleRate !== this.mic.sampleRate) {
-      this.detector = new NoteDetector({ sampleRate: this.mic.sampleRate, tines: this.tuning.tines })
+      this.buildDetector()
     } else {
       this.detector.reset()
     }
@@ -54,6 +55,20 @@ export class AudioEngine {
       this.running = true
       requestAnimationFrame(this.tick)
     }
+  }
+
+  /** Per-tine calibration (cents by position), saved on this device. */
+  get calibration(): Record<number, number> {
+    return load<Record<number, number>>(`calibration:${this.tuning.id}`, {})
+  }
+
+  setCalibration(offsets: Record<number, number>) {
+    save(`calibration:${this.tuning.id}`, offsets)
+    if (this.detector) this.buildDetector()
+  }
+
+  private buildDetector() {
+    this.detector = new NoteDetector({ sampleRate: this.mic.sampleRate, tines: this.tuning.tines, offsets: this.calibration })
   }
 
   /** Back from the background: resume quietly if possible. Returns whether a tap is needed. */

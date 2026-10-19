@@ -31,12 +31,14 @@
 import { midiToHz, type Tine } from '../config/tunings'
 import { biquad } from './filter'
 import { createSalience } from './salience'
-import { snapToTine, type Snapped } from './snap'
+import { snapToTine, tineHz, type Snapped } from './snap'
 import { createYin, type PitchEstimate } from './yin'
 
 export interface DetectorConfig {
   sampleRate: number
   tines: Tine[]
+  /** Calibration: how far each tine (by position) sits from its nominal pitch, cents. */
+  offsets?: Record<number, number>
   /** Samples for the tine amplitudes; long enough to separate E4 from F4. */
   frameSize: number
   /** Newest samples given to YIN. */
@@ -155,7 +157,7 @@ export class NoteDetector {
     this.config = { ...DEFAULT_CONFIG, ...config }
     const c = this.config
     this.yin = createYin(c.pitchWindow, { sampleRate: c.sampleRate, minHz: c.minHz, maxHz: c.maxHz, threshold: c.yinThreshold })
-    this.salience = createSalience(c.frameSize, c.sampleRate, c.tines.map((t) => midiToHz(t.midi)))
+    this.salience = createSalience(c.frameSize, c.sampleRate, c.tines.map((t) => tineHz(t, c.offsets)))
     this.hfBuf = new Float32Array(c.levelWindow + 384)
     this.prevSalience = new Float32Array(c.tines.length)
     this.baseline = new Float32Array(c.tines.length)
@@ -198,7 +200,7 @@ export class NoteDetector {
     this.trackNoiseFloor(levelDb, dt, maxDb(sal))
     const gateDb = Math.max(c.gateDb, (this.noiseFloor || -Infinity) + c.gateAboveNoiseDb)
     const estimate = levelDb > gateDb ? raw : { hz: null, confidence: 0 }
-    const snapped = pitched && levelDb > gateDb ? snapToTine(raw.hz!, c.tines, c.maxCents) : null
+    const snapped = pitched && levelDb > gateDb ? snapToTine(raw.hz!, c.tines, c.maxCents, c.offsets) : null
 
     // Onset cues (see the top of the file). Each compares against a peak
     // envelope falling at a fixed rate, decayed to now before comparing.
@@ -280,7 +282,7 @@ export class NoteDetector {
     // YIN referees, but only on a clean signal: it resolves neighbours far
     // better, yet a mix of two tines can fool it into a pitch in between.
     if (yin?.hz && yin.confidence >= CLEAN_CONFIDENCE) {
-      const off = Math.abs(1200 * Math.log2(yin.hz / midiToHz(tines[best].midi)))
+      const off = Math.abs(1200 * Math.log2(yin.hz / tineHz(tines[best], this.config.offsets)))
       if (snapped && snapped.tine !== tines[best]) {
         const k = tines.indexOf(snapped.tine)
         if (growth[k] >= 0.5 * growth[best]) best = k

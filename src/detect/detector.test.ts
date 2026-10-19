@@ -157,4 +157,18 @@ describe('NoteDetector', () => {
     const right = got.filter((n, i) => n === melody[i]).length
     expect(right / melody.length).toBeGreaterThanOrEqual(0.95)
   })
+
+  it('uses calibration to follow a badly detuned tine (+45 cents)', () => {
+    const sig = mix(renderPerformance([{ hz: hzOf('G4') * Math.pow(2, 45 / 1200), at: 0.3 }, { hz: hzOf('A4'), at: 1.0 }], 2, SR), quiet(2))
+    const g4 = tines.find((t) => t.note === 'G4')!.pos
+    const d = (offsets?: Record<number, number>) => {
+      const det = new NoteDetector({ sampleRate: SR, tines, offsets })
+      const out: NoteEvent[] = []
+      for (let end = 4096; end <= sig.length; end += 800) out.push(...det.process(sig.subarray(end - 4096, end), (end / SR) * 1000).notes)
+      return out
+    }
+    const calibrated = d({ [g4]: 45 })
+    expect(names(calibrated)).toEqual(['G4', 'A4'])
+    expect(Math.abs(calibrated[0].cents!)).toBeLessThan(5)
+  })
 })

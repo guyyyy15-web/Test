@@ -437,3 +437,40 @@ a.chip-btn { text-decoration: none; display: inline-flex; align-items: center; }
 .slider input { width: 100%; accent-color: var(--accent); }
 .slider small { color: var(--muted); }
 .countin { font-size: 30px; font-weight: 800; color: var(--accent); text-shadow: var(--glow); }
+
+/* ---- Tuner ---- */
+.tuner { text-align: center; transition: opacity 0.4s; }
+.tuner.stale .gauge, .tuner.stale .tuner-cents { opacity: 0.35; }
+.tuner-target { display: flex; flex-direction: column; align-items: center; }
+.tuner-target span { font-size: 54px; font-weight: 800; line-height: 1; text-shadow: 0 0 20px currentColor; direction: ltr; }
+.tuner-target small { color: var(--muted); }
+.gauge { width: 100%; max-width: 320px; margin: 4px auto 0; display: block; direction: ltr; }
+.g-arc { fill: none; stroke: rgba(127, 127, 160, 0.25); stroke-width: 10; stroke-linecap: round; }
+.g-near { fill: none; stroke: rgba(255, 225, 86, 0.45); stroke-width: 10; }
+.g-ok { fill: none; stroke: var(--ok); stroke-width: 10; filter: drop-shadow(0 0 4px var(--ok)); }
+.g-tick { stroke: var(--muted); stroke-width: 2; }
+.g-label { fill: var(--muted); font-size: 10px; }
+.g-needle { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; transition: transform 0.12s ease-out; filter: drop-shadow(0 0 6px var(--accent)); }
+.g-needle.ok { stroke: var(--ok); filter: drop-shadow(0 0 6px var(--ok)); }
+.g-hub { fill: var(--text); }
+.tuner-cents { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.tuner-cents.ok { color: var(--ok); }
+.tuner-cents.near { color: #ffe156; }
+.tuner-cents.far { color: #ffb44f; }
+.tuner-advice { margin-top: 6px; line-height: 1.5; min-height: 3em; }
+.tuner-advice small { color: var(--muted); }
+.tuner-diagram .diagram { width: 190px; margin: 6px auto 0; display: block; direction: rtl; }
+.d-label { fill: var(--text); font-size: 12px; font-weight: 700; }
+.d-small { fill: var(--muted); font-size: 9px; }
+.d-bridge { fill: #c9c2f0; }
+.d-tap { fill: none; stroke: var(--accent); stroke-width: 3; animation: tap 0.9s ease-in-out infinite; }
+.d-tapt { fill: var(--text); font-size: 8px; font-weight: 700; }
+.d-arrow { stroke: var(--accent2); stroke-width: 3; fill: none; }
+.d-head { fill: var(--accent2); }
+@keyframes tap {
+  0%, 100% { stroke-width: 3; opacity: 1; }
+  50% { stroke-width: 6; opacity: 0.6; }
+}
+.tips { margin: 8px 0 0; padding-inline-start: 18px; line-height: 1.6; color: var(--muted); }
+.tips b { color: var(--text); }
+.space { justify-content: space-between; }

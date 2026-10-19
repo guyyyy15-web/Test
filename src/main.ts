@@ -9,6 +9,7 @@ import { lab } from './screens/lab'
 import { play } from './screens/play'
 import { songs } from './screens/songs'
 import { soon } from './screens/soon'
+import { tuner } from './screens/tuner'
 
 const tuning = K17_C
 const engine = new AudioEngine(tuning)
@@ -21,7 +22,7 @@ const routes: Record<string, Screen> = {
   songs,
   play,
   import: soon('הוספת שיר'),
-  tuner: soon('כיוון'),
+  tuner,
 }
 
 // ---- Audio gate: iOS only starts audio inside a tap ----
