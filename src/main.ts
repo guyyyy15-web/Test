@@ -61,6 +61,18 @@ function showMicError(err: MicError) {
 }
 $('mic-error-ok').addEventListener('click', () => ($('mic-error').hidden = true))
 
+// ---- Toast ----
+function toast(text: string, ms = 6000) {
+  const el = $('toast')
+  el.innerHTML = text
+  el.hidden = false
+  clearTimeout(Number(el.dataset.timer))
+  el.dataset.timer = String(setTimeout(() => (el.hidden = true), ms))
+}
+$('toast').addEventListener('click', () => ($('toast').hidden = true))
+
+engine.onMuted = () => toast('🔇 לא שומעים את צליל ההדרכה? בדוק שמתג השקט בצד האייפון כבוי ושהעוצמה למעלה.')
+
 // ---- Router ----
 let cleanup: () => void = () => {}
 

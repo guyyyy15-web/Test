@@ -96,7 +96,32 @@ export class AudioEngine {
   /** Play a tine as a guide; the mic is muted while it rings unless on headphones. */
   playGuide(midi: number, velocity = 0.8) {
     this.synth?.play(midi, velocity)
-    if (!this.headphones) this.detector?.suppressUntil(performance.now() + KalimbaSynth.AUDIBLE * 1000)
+    if (this.headphones) return
+    this.detector?.suppressUntil(performance.now() + KalimbaSynth.AUDIBLE * 1000)
+    this.checkAudible(midi)
+  }
+
+  /**
+   * Called when guide tones seem not to come out of the speaker (the
+   * ringer switch on silent, volume at zero): through the speaker the mic
+   * always hears its own guide tone, so if it does not, sound is muted.
+   */
+  onMuted: (() => void) | null = null
+  private unheard = 0
+
+  private checkAudible(midi: number) {
+    const k = this.tuning.tines.findIndex((t) => t.midi === midi)
+    if (k < 0 || !this.listening) return
+    const until = performance.now() + 400
+    let heard = false
+    const off = this.onFrame((info, now) => {
+      if (20 * Math.log10(info.salience[k] / Math.SQRT2 || 1e-9) > info.gateDb) heard = true
+      if (now < until) return
+      off()
+      this.unheard = heard ? 0 : this.unheard + 1
+      // Two in a row, so one masked by a loud pluck does not count.
+      if (this.unheard === 2) this.onMuted?.()
+    })
   }
 
   /** Audio clock in ms on the same timeline as note events (performance.now). */
