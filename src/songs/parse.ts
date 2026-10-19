@@ -2,7 +2,7 @@
 //
 // Number notation (1 = C4 on a C kalimba):
 //   1 2 3 | 4 5 6 7        bars are just visual
-//   1' 1° 1* 1• 1^         one octave up (repeat the mark for more: 1'')
+//   1' 1° 1* 1• 1^ 1̇      one octave up (repeat the mark for more: 1'')
 //   1,                     one octave down
 //   5-  5--                held 2 / 3 beats ("-" adds a beat; a lone "-" extends the previous note)
 //   5_  5.                 half a beat / dotted (×1.5)
@@ -29,7 +29,9 @@ export interface ParseResult {
 
 const DEGREE_SEMITONES = [0, 2, 4, 5, 7, 9, 11]
 const LETTER_SEMITONES: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }
-const UP = "'’°*•^"
+// Octave-up marks seen in the wild, including a dot above the digit (U+0307)
+// and its spacing forms.
+export const UP = "'’°º*•^˙\u0307"
 
 const NUMBER_RE = new RegExp(`^([0-7])([${UP}]*)(,*)([-_.]*)$`)
 const LETTER_RE = new RegExp(`^([A-Ga-g])([#b♯♭]?)(\\d)?([${UP}]*)(,*)([-_.]*)$`)
@@ -44,7 +46,7 @@ function duration(suffix: string): number {
   return beats
 }
 
-function tokenize(line: string): string[] {
+export function tokenize(line: string): string[] {
   return line
     .replace(/[()[\]{}]/g, ' ')
     .split(/[\s|]+/)
@@ -52,7 +54,7 @@ function tokenize(line: string): string[] {
 }
 
 /** Read one token in a format; null if it is not that format. */
-function readToken(token: string, format: ParseResult['format'], tonic: number): { midi: number | null; beats: number } | null {
+export function readToken(token: string, format: ParseResult['format'], tonic: number): { midi: number | null; beats: number } | null {
   if (format === 'numbers') {
     const m = NUMBER_RE.exec(token)
     if (!m) return null

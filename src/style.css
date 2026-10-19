@@ -531,3 +531,10 @@ a.chip-btn { text-decoration: none; display: inline-flex; align-items: center; }
   opacity: 0.55;
 }
 .level.on { opacity: 1; border-color: currentColor; }
+
+.quick { display: flex; flex-direction: column; gap: 14px; }
+.found { border-color: rgba(92, 242, 160, 0.5); box-shadow: 0 0 20px rgba(92, 242, 160, 0.12); }
+.found-head { margin: 0; font-weight: 800; color: var(--ok); font-size: 17px; }
+.big-action { font-size: 17px; padding: 12px 22px; min-height: 48px; }
+#adv { display: flex; flex-direction: column; gap: 14px; }
+#adv[hidden] { display: none; }

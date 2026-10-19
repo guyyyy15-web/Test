@@ -1,6 +1,8 @@
 import { esc, html, type Screen } from '../app/context'
 import { degreeLabel, type Tine } from '../config/tunings'
-import { outOfRange, parseTab, suggestShift } from '../songs/parse'
+import type { App } from '../app/context'
+import { outOfRange, parseTab, suggestShift, type ParsedNote } from '../songs/parse'
+import { extractSong } from '../songs/smartPaste'
 import { DIFFICULTY_LABEL, type Difficulty, type Song } from '../songs/song'
 import { findSong, saveUserSong } from '../songs/store'
 import { DEGREE_COLORS } from '../theme'
@@ -20,6 +22,29 @@ export const importSong: Screen = (root, app, params) => {
   let shift = song.shift ?? 0
 
   root.innerHTML = html`
+    ${
+      editing
+        ? ''
+        : `<div id="quick" class="quick">
+      <div class="card form">
+        <label>הדבק כאן טאב מהאינטרנט
+          <small>מעתיקים את כל הטאב מהאתר, כמו שהוא: שם השיר, שורות התווים, מילים, "פזמון:"… האפליקציה תבין לבד מה מה.</small>
+          <textarea id="q-text" dir="auto" rows="8" spellcheck="false" placeholder="Twinkle Twinkle Little Star
+1 1 5 5 6 6 5
+Twinkle twinkle little star
+4 4 3 3 2 2 1
+How I wonder what you are"></textarea>
+        </label>
+        <div class="row">
+          <button id="q-paste" class="chip-btn primary">📋 הדבק מהלוח</button>
+          <button id="q-clear" class="chip-btn">נקה</button>
+        </div>
+      </div>
+      <div id="q-result"></div>
+      <button id="q-advanced" class="chip-btn ghost">✎ כתיבה ידנית / עריכה מתקדמת</button>
+    </div>`
+    }
+    <div id="adv"${editing ? '' : ' hidden'}>
     <div class="card form">
       <label>שם השיר *<input id="f-title" value="${esc(song.title ?? '')}" dir="auto" autocomplete="off" /></label>
       <label>אמן<input id="f-artist" value="${esc(song.artist ?? '')}" dir="auto" autocomplete="off" /></label>
@@ -62,6 +87,7 @@ export const importSong: Screen = (root, app, params) => {
       <button id="f-save" class="chip-btn primary">💾 שמור ונגן</button>
       <a class="chip-btn" href="#/songs">ביטול</a>
     </div>
+    </div>
   `
   const $ = <T extends HTMLElement = HTMLElement>(id: string) => root.querySelector<T>(`#${id}`)!
   const val = (id: string) => ($<HTMLInputElement>(id).value ?? '').trim()
@@ -93,16 +119,7 @@ export const importSong: Screen = (root, app, params) => {
       })
     }
 
-    // Notes as coloured chips, one row per phrase.
-    const rows: string[][] = []
-    r.notes.forEach((n, i) => {
-      const row = (rows[n.phrase] ??= [])
-      if (n.midi === null) return void row.push(`<span class="chip rest">·</span>`)
-      const midi = n.midi + shift
-      const tine = playable.get(midi)
-      row.push(tine && !bad.has(i) ? `<span class="chip" style="--c:${DEGREE_COLORS[tine.degree]}">${degreeLabel(tine)}</span>` : `<span class="chip bad">${noteName(midi)}</span>`)
-    })
-    $('f-preview').innerHTML = rows.filter(Boolean).map((r) => `<div class="phrase">${r.join('')}</div>`).join('')
+    $('f-preview').innerHTML = phraseChips(r.notes, shift, playable)
     return { r, bad }
   }
 
@@ -112,20 +129,7 @@ export const importSong: Screen = (root, app, params) => {
   })
   preview()
 
-  $('f-listen').addEventListener('click', async () => {
-    await app.requireAudio()
-    const synth = app.engine.synth
-    const ctx = app.engine.mic.ctx
-    if (!synth || !ctx) return
-    const beat = 60 / Math.max(30, Number(val('f-bpm')) || 90)
-    let t = ctx.currentTime + 0.1
-    for (const n of parseTab(val('f-tab')).notes.slice(0, 64)) {
-      if (n.midi !== null) synth.play(n.midi + shift, 0.7, t)
-      t += n.beats * beat
-    }
-    // Keep the mic from hearing the preview through the speaker.
-    if (!app.engine.headphones) app.engine.detector?.suppressUntil(performance.now() + (t - ctx.currentTime) * 1000 + 1200)
-  })
+  $('f-listen').addEventListener('click', () => playTab(app, val('f-tab'), shift, Number(val('f-bpm')) || 90))
 
   $('f-save').addEventListener('click', () => {
     const { r, bad } = preview()
@@ -152,6 +156,126 @@ export const importSong: Screen = (root, app, params) => {
     app.go(`play/${encodeURIComponent(id)}`)
   })
 
+  // ---- Quick add: paste anything, get a song ----
+  if (!editing) {
+    let found: ReturnType<typeof extractSong> = null
+    let timer = 0
+
+    function analyse() {
+      const text = $<HTMLTextAreaElement>('q-text').value
+      found = text.trim() ? extractSong(text, new Set(playable.keys())) : null
+      const out = $('q-result')
+      if (!text.trim()) return void (out.innerHTML = '')
+      if (!found) {
+        out.innerHTML = `<div class="card"><p class="bad-text">לא מצאתי תווים בטקסט. ודא שהעתקת גם את שורות המספרים (כמו <span dir="ltr">1 1 5 5 6 6 5</span>) או האותיות (<span dir="ltr">C C G G A A G</span>).</p></div>`
+        return
+      }
+      const f = found
+      const facts = [
+        `${f.noteCount} תווים`,
+        `${f.tab.split('\n').length} שורות`,
+        f.lyrics ? `${f.lyrics.filter(Boolean).length} שורות מילים` : 'בלי מילים',
+        `רמה: ${DIFFICULTY_LABEL[f.difficulty]}`,
+      ]
+      if (f.shift) facts.push(f.shift % 12 === 0 ? `הוזז ${Math.abs(f.shift / 12)} אוקטבה ${f.shift > 0 ? 'למעלה' : 'למטה'} כדי להתאים לקלימבה` : `הועבר סולם (${f.shift > 0 ? '+' : ''}${f.shift}) כדי להתאים לקלימבה`)
+      out.innerHTML = html`
+        <div class="card form found">
+          <p class="found-head">✓ זיהיתי שיר</p>
+          <label>שם השיר<input id="q-title" value="${esc(f.title)}" dir="auto" autocomplete="off" /></label>
+          <label>אמן <small>(לא חובה)</small><input id="q-artist" value="${esc(f.artist ?? '')}" dir="auto" autocomplete="off" /></label>
+          <p class="hint">${facts.join(' · ')}</p>
+          ${f.unplayable ? `<p class="bad-text">${f.unplayable} תווים לא קיימים בקלימבה שלך ויסומנו באדום. אפשר לתקן בעריכה המתקדמת.</p>` : ''}
+          <div class="preview" dir="ltr">${phraseChips(parseTab(f.tab).notes, f.shift, playable)}</div>
+          ${f.skipped.length ? `<details class="help"><summary>${f.skipped.length} שורות דילגתי עליהן</summary><ul class="tips">${f.skipped.map((l) => `<li dir="auto">${esc(l)}</li>`).join('')}</ul></details>` : ''}
+          <div class="row center-row">
+            <button id="q-save" class="chip-btn primary big-action">💾 שמור ונגן</button>
+            <button id="q-listen" class="chip-btn">🔊 השמע</button>
+          </div>
+        </div>`
+      $('q-listen').addEventListener('click', () => playTab(app, f.tab, f.shift, 90))
+      $('q-save').addEventListener('click', () => {
+        const id = saveUserSong({
+          id: '',
+          title: val('q-title') || f.title,
+          artist: val('q-artist') || undefined,
+          bpm: 90,
+          difficulty: f.difficulty,
+          category: 'שלי',
+          tags: [],
+          tab: f.tab,
+          lyrics: f.lyrics,
+          shift: f.shift || undefined,
+        })
+        app.go(`play/${encodeURIComponent(id)}`)
+      })
+    }
+
+    $('q-text').addEventListener('input', () => {
+      clearTimeout(timer)
+      timer = window.setTimeout(analyse, 200)
+    })
+    $('q-paste').addEventListener('click', async () => {
+      try {
+        $<HTMLTextAreaElement>('q-text').value = await navigator.clipboard.readText()
+        analyse()
+      } catch {
+        $('q-text').focus()
+        $('q-result').innerHTML = `<div class="card"><p class="hint">הדפדפן לא איפשר לקרוא מהלוח. לחץ לחיצה ארוכה בתיבה ובחר "הדבק".</p></div>`
+      }
+    })
+    $('q-clear').addEventListener('click', () => {
+      $<HTMLTextAreaElement>('q-text').value = ''
+      analyse()
+    })
+    $('q-advanced').addEventListener('click', () => {
+      // Carry whatever was recognised into the full form.
+      if (found) {
+        $<HTMLInputElement>('f-title').value = val('q-title') || found.title
+        $<HTMLInputElement>('f-artist').value = val('q-artist') || found.artist || ''
+        $<HTMLTextAreaElement>('f-tab').value = found.tab
+        $<HTMLTextAreaElement>('f-lyrics').value = (found.lyrics ?? []).join('\n')
+        $<HTMLSelectElement>('f-diff').value = found.difficulty
+        shift = found.shift
+        preview()
+      }
+      $('quick').hidden = true
+      $('adv').hidden = false
+      window.scrollTo(0, 0)
+    })
+  }
+
   return () => {}
+}
+
+/** Notes as coloured chips, one row per phrase; notes the instrument lacks in red. */
+function phraseChips(notes: ParsedNote[], shift: number, playable: Map<number, Tine>): string {
+  const rows: string[][] = []
+  for (const n of notes) {
+    const row = (rows[n.phrase] ??= [])
+    if (n.midi === null) {
+      row.push(`<span class="chip rest">·</span>`)
+      continue
+    }
+    const midi = n.midi + shift
+    const tine = playable.get(midi)
+    row.push(tine ? `<span class="chip" style="--c:${DEGREE_COLORS[tine.degree]}">${degreeLabel(tine)}</span>` : `<span class="chip bad">${noteName(midi)}</span>`)
+  }
+  return rows.filter(Boolean).map((r) => `<div class="phrase">${r.join('')}</div>`).join('')
+}
+
+/** Play a tab through the synth (first 64 notes), muting the mic meanwhile. */
+async function playTab(app: App, tab: string, shift: number, bpm: number) {
+  await app.requireAudio()
+  const synth = app.engine.synth
+  const ctx = app.engine.mic.ctx
+  if (!synth || !ctx) return
+  const beat = 60 / Math.max(30, bpm)
+  let t = ctx.currentTime + 0.1
+  for (const n of parseTab(tab).notes.slice(0, 64)) {
+    if (n.midi !== null) synth.play(n.midi + shift, 0.7, t)
+    t += n.beats * beat
+  }
+  // Keep the mic from hearing the preview through the speaker.
+  if (!app.engine.headphones) app.engine.detector?.suppressUntil(performance.now() + (t - ctx.currentTime) * 1000 + 1200)
 }
 
