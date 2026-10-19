@@ -7,6 +7,7 @@ import { free } from './screens/free'
 import { home } from './screens/home'
 import { importSong } from './screens/importSong'
 import { lab } from './screens/lab'
+import { latency } from './screens/latency'
 import { play } from './screens/play'
 import { songs } from './screens/songs'
 import { tuner } from './screens/tuner'
@@ -22,6 +23,7 @@ const routes: Record<string, Screen> = {
   songs,
   play,
   import: importSong,
+  latency,
   tuner,
 }
 

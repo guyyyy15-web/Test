@@ -24,6 +24,7 @@ export const play: Screen = (root, app, params) => {
     return () => {}
   }
   app.setTitle(song.titleHe ?? song.title)
+  save('lastSong', params.slice(0, 2).join('/'))
   let stop: () => void = () => {}
   const ctl = { setup, game: (mode: Mode) => (mode === 'wait' ? waitGame() : tempoGame()), stopWith: (fn: () => void) => (stop = fn) }
   setup()
@@ -62,6 +63,7 @@ export const play: Screen = (root, app, params) => {
         <label class="toggle"><input type="checkbox" id="opt-guide" ${load('autoGuide', false) ? 'checked' : ''} /> <span>🔊 השמע כל תו לפני שמנגנים (המתנה)</span></label>
         <label class="toggle"><input type="checkbox" id="opt-phones" ${app.engine.headphones ? 'checked' : ''} /> <span>🎧 אני עם אוזניות</span></label>
         <p class="hint">בלי אוזניות, המיקרופון לא מקשיב בזמן שצליל ההדרכה מתנגן, כדי לא לזהות אותו בטעות. עם אוזניות גם המטרונום לא מפריע לזיהוי.</p>
+        <a class="chip-btn" href="#/latency">⏱ כיול תזמון${load<number | null>('latencyMs', null) === null ? '' : ` (${load('latencyMs', 0)}ms)`}</a>
       </div>
     `
     const bind = (id: string, fn: (el: HTMLInputElement) => void) => root.querySelector<HTMLInputElement>(`#${id}`)!.addEventListener('input', (e) => fn(e.target as HTMLInputElement))

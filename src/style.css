@@ -538,3 +538,20 @@ a.chip-btn { text-decoration: none; display: inline-flex; align-items: center; }
 .big-action { font-size: 17px; padding: 12px 22px; min-height: 48px; }
 #adv { display: flex; flex-direction: column; gap: 14px; }
 #adv[hidden] { display: none; }
+
+.continue {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  color: var(--text);
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(255, 92, 200, 0.22), rgba(138, 92, 255, 0.22));
+  border: 1px solid var(--accent);
+  box-shadow: var(--glow);
+}
+.continue span { font-size: 26px; }
+.continue div { display: flex; flex-direction: column; }
+.continue small { color: var(--muted); }
+.continue b { font-size: 18px; }
