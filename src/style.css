@@ -567,3 +567,5 @@ a.chip-btn { text-decoration: none; display: inline-flex; align-items: center; }
 }
 .mic-ind i.on { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
 .mic-ind b { font-size: 16px; min-width: 18px; direction: ltr; }
+.themes .filter { font-size: 13px; padding: 6px 12px; min-height: 34px; }
+.themes .filter.on { background: linear-gradient(135deg, var(--accent2), #7b8cff); }

@@ -12,7 +12,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'יונתן הקטן',
     difficulty: 'easy',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי', 'ישראלי'],
+    tags: ['ילדים', 'עממי', 'ישראלי', 'אירופאי', 'גרמני'],
     bpm: 100,
     tab: `5 3 3- | 4 2 2-
 1 2 3 4 | 5 5 5-
@@ -29,7 +29,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'כוכב קטן',
     difficulty: 'easy',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי'],
+    tags: ['ילדים', 'עממי', 'אירופאי', 'צרפתי', 'רגוע'],
     bpm: 100,
     tab: `1 1 5 5 | 6 6 5-
 4 4 3 3 | 2 2 1-
@@ -45,7 +45,7 @@ export const LIBRARY: Song[] = [
     artist: 'Beethoven',
     difficulty: 'easy',
     category: 'קלאסי',
-    tags: ['קלאסי'],
+    tags: ['קלאסי', 'אירופאי'],
     bpm: 108,
     tab: `3 3 4 5 | 5 4 3 2
 1 1 2 3 | 3. 2_ 2-
@@ -69,7 +69,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'למרי היה כבש קטן',
     difficulty: 'easy',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי'],
+    tags: ['ילדים', 'עממי', 'אמריקאי'],
     bpm: 108,
     tab: `3 2 1 2 | 3 3 3-
 2 2 2- | 3 5 5-
@@ -82,7 +82,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'אחי יעקב',
     difficulty: 'easy',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי'],
+    tags: ['ילדים', 'עממי', 'אירופאי', 'צרפתי'],
     bpm: 100,
     tab: `1' 2' 3' 1' | 1' 2' 3' 1'
 3' 4' 5'- | 3' 4' 5'-
@@ -95,7 +95,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'גשר לונדון',
     difficulty: 'easy',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי'],
+    tags: ['ילדים', 'עממי', 'אירופאי', 'אנגלי'],
     bpm: 108,
     tab: `5. 6_ 5 4 | 3 4 5-
 2 3 4- | 3 4 5-
@@ -108,7 +108,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'שוטה שוטה סירה',
     difficulty: 'medium',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי'],
+    tags: ['ילדים', 'עממי', 'אמריקאי'],
     bpm: 96,
     tab: `1- 1- | 1. 2_ 3-
 3. 2_ 3. 4_ | 5---
@@ -133,7 +133,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'ג׳ינגל בלס',
     difficulty: 'medium',
     category: 'חגים',
-    tags: ['חגים', 'עממי'],
+    tags: ['חגים', 'עממי', 'אמריקאי'],
     bpm: 120,
     tab: `3 3 3- | 3 3 3-
 3 5 1. 2_ | 3---
@@ -169,7 +169,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'יום הולדת שמח',
     difficulty: 'medium',
     category: 'חגים',
-    tags: ['חגים', 'עממי'],
+    tags: ['חגים', 'עממי', 'אמריקאי'],
     bpm: 100,
     meter: 3,
     tab: `5. 5_ 6 5 | 1' 7-
@@ -184,7 +184,7 @@ export const LIBRARY: Song[] = [
     artist: 'Brahms',
     difficulty: 'medium',
     category: 'קלאסי',
-    tags: ['קלאסי', 'שיר ערש'],
+    tags: ['קלאסי', 'שיר ערש', 'אירופאי', 'רגוע'],
     bpm: 84,
     meter: 3,
     tab: `3_ 3_ 5-- | 3_ 3_ 5--
@@ -199,7 +199,7 @@ export const LIBRARY: Song[] = [
     artist: 'Pachelbel',
     difficulty: 'medium',
     category: 'קלאסי',
-    tags: ['קלאסי', 'חתונה'],
+    tags: ['קלאסי', 'חתונה', 'אירופאי', 'רגוע'],
     bpm: 72,
     tab: `3'- 2'- | 1'- 7-
 6- 5- | 6- 7-
@@ -212,7 +212,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'אמייזינג גרייס',
     difficulty: 'hard',
     category: 'עממי',
-    tags: ['עממי', 'גוספל'],
+    tags: ['עממי', 'גוספל', 'אמריקאי', 'רגוע'],
     bpm: 80,
     meter: 3,
     tab: `5 | 1'- 3'_ 1'_ | 3'- 2' | 1'- 6 | 5- 5
@@ -237,7 +237,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'גרינסליבס',
     difficulty: 'hard',
     category: 'עממי',
-    tags: ['עממי', 'אנגלי'],
+    tags: ['עממי', 'אנגלי', 'אירופאי', 'רגוע'],
     bpm: 96,
     meter: 3,
     tab: `6 | 1'- 2' | 3'. 4'_ 3' | 2'- 7 | 5. 6_ 7
@@ -251,7 +251,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'סקרבורו פייר',
     difficulty: 'hard',
     category: 'עממי',
-    tags: ['עממי', 'אנגלי'],
+    tags: ['עממי', 'אנגלי', 'אירופאי', 'רגוע'],
     bpm: 90,
     meter: 3,
     tab: `2- 2 | 6 6 6 | 3. 4_ 3 | 2--
@@ -265,7 +265,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'אולד לנג סיין',
     difficulty: 'hard',
     category: 'עממי',
-    tags: ['עממי', 'סקוטי', 'חגים'],
+    tags: ['עממי', 'סקוטי', 'חגים', 'אירופאי'],
     bpm: 84,
     tab: `5 | 1'. 1'_ 1' 3' | 2'. 1'_ 2' 3'
 1'. 1'_ 3' 5' | 6'-- 6'
@@ -280,7 +280,7 @@ export const LIBRARY: Song[] = [
     artist: 'Bach (Petzold)',
     difficulty: 'medium',
     category: 'קלאסי',
-    tags: ['קלאסי', 'בארוק'],
+    tags: ['קלאסי', 'בארוק', 'אירופאי'],
     bpm: 100,
     meter: 3,
     levelNote: 'המנגינה המלאה עם הריצות',
@@ -307,7 +307,7 @@ export const LIBRARY: Song[] = [
     artist: 'Haydn',
     difficulty: 'easy',
     category: 'קלאסי',
-    tags: ['קלאסי'],
+    tags: ['קלאסי', 'אירופאי'],
     bpm: 100,
     tab: `1' 1' 3' 3' | 5' 5' 3'-
 4' 4' 2' 2' | 7 7 5-
@@ -321,7 +321,7 @@ export const LIBRARY: Song[] = [
     artist: 'Dvořák',
     difficulty: 'easy',
     category: 'קלאסי',
-    tags: ['קלאסי', 'רומנטי'],
+    tags: ['קלאסי', 'רומנטי', 'רגוע'],
     bpm: 66,
     tab: `3 5 5- | 3 2 1-
 2 3 5 3 | 2---
@@ -335,7 +335,7 @@ export const LIBRARY: Song[] = [
     artist: 'Grieg',
     difficulty: 'medium',
     category: 'קלאסי',
-    tags: ['קלאסי', 'רומנטי'],
+    tags: ['קלאסי', 'רומנטי', 'אירופאי', 'רגוע'],
     bpm: 132,
     meter: 6,
     tab: `5 3 2 1 2 3 | 5 3 2 1 2_ 3_ 2_ 3_
@@ -348,7 +348,7 @@ export const LIBRARY: Song[] = [
     artist: 'Vivaldi',
     difficulty: 'medium',
     category: 'קלאסי',
-    tags: ['קלאסי', 'בארוק'],
+    tags: ['קלאסי', 'בארוק', 'אירופאי'],
     bpm: 100,
     tab: `1 | 3 3 3 2_ 1_ | 5-- 5_ 4_
 3 3 3 2_ 1_ | 5-- 5_ 4_
@@ -361,7 +361,7 @@ export const LIBRARY: Song[] = [
     artist: 'Offenbach',
     difficulty: 'hard',
     category: 'קלאסי',
-    tags: ['קלאסי', 'מהיר'],
+    tags: ['קלאסי', 'מהיר', 'אירופאי'],
     bpm: 112,
     tab: `1 2_ 4_ 3_ 2_ | 5 5 | 5_ 6_ 3_ 4_ | 2 2
 2_ 4_ 3_ 2_ | 1_ 1'_ 7_ 6_ | 5_ 4_ 3_ 2_ | 1-
@@ -376,7 +376,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'לחמניות חמות',
     difficulty: 'easy',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי', 'למתחילים'],
+    tags: ['ילדים', 'עממי', 'למתחילים', 'אנגלי'],
     bpm: 96,
     tab: `3 2 1- | 3 2 1-
 1_ 1_ 1_ 1_ 2_ 2_ 2_ 2_ | 3 2 1-`,
@@ -387,7 +387,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'לדוד משה הייתה חווה',
     difficulty: 'easy',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי'],
+    tags: ['ילדים', 'עממי', 'אמריקאי'],
     bpm: 108,
     tab: `1' 1' 1' 5 | 6 6 5-
 3' 3' 2' 2' | 1'---
@@ -400,7 +400,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'לאור הירח',
     difficulty: 'easy',
     category: 'ילדים',
-    tags: ['ילדים', 'עממי', 'צרפתי'],
+    tags: ['ילדים', 'עממי', 'צרפתי', 'אירופאי'],
     bpm: 96,
     tab: `1' 1' 1' 2' | 3'- 2'- | 1' 3' 2' 2' | 1'---
 1' 1' 1' 2' | 3'- 2'- | 1' 3' 2' 2' | 1'---
@@ -413,7 +413,7 @@ export const LIBRARY: Song[] = [
     titleHe: 'קומבאיה',
     difficulty: 'easy',
     category: 'עממי',
-    tags: ['עממי', 'מדורה'],
+    tags: ['עממי', 'מדורה', 'אמריקאי', 'רגוע'],
     bpm: 84,
     tab: `1 3 5 5- | 5 6 6 5-
 1 3 5 5- | 4 3 2--
@@ -426,12 +426,264 @@ export const LIBRARY: Song[] = [
     titleHe: 'כשהקדושים צועדים',
     difficulty: 'medium',
     category: 'עממי',
-    tags: ['עממי', 'ג׳אז'],
+    tags: ['עממי', 'ג׳אז', 'אמריקאי'],
     bpm: 120,
     tab: `1 3 4 | 5---
 1 3 4 | 5---
 1 3 4 5- 3- 1- 3- | 2---
 3 3 2 1- 1 3- 5 5 4---
 3 4 5- 3- 1- 2- | 1---`,
+  },
+  // ---- Japan ----
+  {
+    id: 'sakura',
+    title: 'Sakura Sakura',
+    titleHe: 'סאקורה סאקורה',
+    difficulty: 'medium',
+    category: 'עממי',
+    tags: ['יפני', 'עממי', 'רגוע'],
+    bpm: 72,
+    tab: `6' 6' 7'- | 6' 6' 7'-
+6' 7' 1'' 7' | 6' 7'_ 6'_ 4'-
+3' 1' 3' 4' | 3' 3'_ 1'_ 7-
+6' 7' 1'' 7' | 6' 7'_ 6'_ 4'-
+3' 1' 3' 4' | 3' 3'_ 1'_ 7-
+6' 6' 7'- | 6' 6' 7'-
+3' 4' 7'_ 6'_ 4' | 3'---`,
+  },
+  {
+    id: 'kojo-no-tsuki',
+    title: 'Kōjō no Tsuki (The Moon over the Ruined Castle)',
+    titleHe: 'הירח מעל הטירה ההרוסה',
+    artist: 'Rentarō Taki',
+    difficulty: 'medium',
+    category: 'עממי',
+    tags: ['יפני', 'רגוע'],
+    bpm: 66,
+    tab: `3' 3' 6' 7' | 1'' 7' 6'-
+4' 4' 3' 2' | 3'---
+3' 3' 6' 7' | 1'' 7' 6'-
+4' 2' 3' 3' | 6---`,
+  },
+
+  // ---- Europe ----
+  {
+    id: 'alle-meine-entchen',
+    title: 'Alle meine Entchen',
+    titleHe: 'כל הברווזונים שלי',
+    difficulty: 'easy',
+    category: 'ילדים',
+    tags: ['אירופאי', 'גרמני', 'ילדים', 'למתחילים'],
+    bpm: 100,
+    tab: `1 2 3 4 | 5- 5-
+6 6 6 6 | 5---
+6 6 6 6 | 5---
+4 4 4 4 | 3- 3-
+2 2 2 2 | 1---`,
+  },
+  {
+    id: 'korobeiniki',
+    title: 'Korobeiniki (the Tetris theme)',
+    titleHe: 'קורובייניקי (המנגינה של טטריס)',
+    difficulty: 'medium',
+    category: 'עממי',
+    tags: ['אירופאי', 'רוסי', 'עממי', 'משחקים'],
+    bpm: 120,
+    levelNote: 'המנגינה המלאה',
+    tab: `3' 7_ 1'_ 2' 1'_ 7_ | 6 6_ 1'_ 3' 2'_ 1'_
+7. 1'_ 2' 3' | 1' 6 6-
+2'. 4'_ 6' 5'_ 4'_ | 3'. 1'_ 3' 2'_ 1'_
+7 7_ 1'_ 2' 3' | 1' 6 6-`,
+    levels: [
+      {
+        difficulty: 'easy',
+        bpm: 96,
+        note: 'רק החצי הראשון, לאט',
+        tab: `3' 7_ 1'_ 2' 1'_ 7_ | 6 6_ 1'_ 3' 2'_ 1'_
+7. 1'_ 2' 3' | 1' 6 6-
+3' 7_ 1'_ 2' 1'_ 7_ | 6 6_ 1'_ 3' 2'_ 1'_
+7. 1'_ 2' 3' | 1' 6 6-`,
+      },
+      {
+        difficulty: 'hard',
+        bpm: 144,
+        note: 'הכל פעמיים, מהר',
+        tab: `3' 7_ 1'_ 2' 1'_ 7_ | 6 6_ 1'_ 3' 2'_ 1'_
+7. 1'_ 2' 3' | 1' 6 6-
+2'. 4'_ 6' 5'_ 4'_ | 3'. 1'_ 3' 2'_ 1'_
+7 7_ 1'_ 2' 3' | 1' 6 6-
+3' 7_ 1'_ 2' 1'_ 7_ | 6 6_ 1'_ 3' 2'_ 1'_
+7. 1'_ 2' 3' | 1' 6 6-
+2'. 4'_ 6' 5'_ 4'_ | 3'. 1'_ 3' 2'_ 1'_
+7 7_ 1'_ 2' 3' | 1' 6 6-`,
+      },
+    ],
+  },
+  {
+    id: 'o-tannenbaum',
+    title: 'O Tannenbaum',
+    titleHe: 'הו עץ האשוח',
+    difficulty: 'medium',
+    category: 'חגים',
+    tags: ['אירופאי', 'גרמני', 'חגים'],
+    bpm: 90,
+    meter: 3,
+    tab: `5 | 1'. 1'_ 1' | 2'. 3'_ 3'- | 3' 2' 3' | 4' 7- | 2' 1'-
+5 | 1'. 1'_ 1' | 2'. 3'_ 3'- | 3' 2' 3' | 4' 7- | 2' 1'-
+5' 5' 3' | 6'. 5'_ 5' | 4' 4'. 4'_ | 4' 2' 5'. 4'_ | 4' 3'-
+5 | 1'. 1'_ 1' | 2'. 3'_ 3'- | 3' 2' 3' | 4' 7- | 2' 1'-`,
+  },
+  {
+    id: 'silent-night',
+    title: 'Silent Night (Stille Nacht)',
+    titleHe: 'לילה שקט',
+    artist: 'Gruber',
+    difficulty: 'medium',
+    category: 'חגים',
+    tags: ['אירופאי', 'חגים', 'רגוע', 'שיר ערש'],
+    bpm: 84,
+    meter: 3,
+    tab: `5. 6_ 5 | 3--
+5. 6_ 5 | 3--
+2'- 2' | 7--
+1'- 1' | 5--
+6- 6 | 1'. 7_ 6 | 5. 6_ 5 | 3--
+6- 6 | 1'. 7_ 6 | 5. 6_ 5 | 3--
+2'- 2' | 4'. 2'_ 7 | 1'-- | 3'--
+1'. 5_ 3 | 5. 4_ 2 | 1--`,
+  },
+  {
+    id: 'deck-the-halls',
+    title: 'Deck the Halls',
+    titleHe: 'קשטו את האולמות',
+    difficulty: 'medium',
+    category: 'חגים',
+    tags: ['אירופאי', 'וולשי', 'חגים'],
+    bpm: 112,
+    tab: `5'. 4'_ 3' 2' | 1' 2' 3' 1' | 2'_ 3'_ 4'_ 2'_ 3'. 2'_ | 1' 7 1'-
+5'. 4'_ 3' 2' | 1' 2' 3' 1' | 2'_ 3'_ 4'_ 2'_ 3'. 2'_ | 1' 7 1'-
+2'. 3'_ 4' 2' | 3'. 4'_ 5' 2' | 3'_ 4'_ 5' 6'_ 7'_ 1'' | 7' 6' 5'-
+5'. 4'_ 3' 2' | 1' 2' 3' 1' | 6'_ 6'_ 6'_ 6'_ 5'. 4'_ | 3' 2' 1'-`,
+  },
+  {
+    id: 'we-wish-you',
+    title: 'We Wish You a Merry Christmas',
+    titleHe: 'אנחנו מאחלים לכם חג שמח',
+    difficulty: 'medium',
+    category: 'חגים',
+    tags: ['אירופאי', 'אנגלי', 'חגים'],
+    bpm: 120,
+    meter: 3,
+    tab: `5 | 1' 1'_ 2'_ 1'_ 7_ | 6 6 6
+2' 2'_ 3'_ 2'_ 1'_ | 7 5 5
+3' 3'_ 4'_ 3'_ 2'_ | 1' 6 5_ 5_
+6 2' 7 | 1'--`,
+  },
+
+  // ---- America ----
+  {
+    id: 'oh-susanna',
+    title: 'Oh! Susanna',
+    titleHe: 'הו סוזנה',
+    artist: 'Stephen Foster',
+    difficulty: 'easy',
+    category: 'עממי',
+    tags: ['אמריקאי', 'עממי'],
+    bpm: 108,
+    levelNote: 'הבית',
+    tab: `1 2 | 3 5 5. 6_ | 5 3 1. 2_ | 3 3 2 1 | 2---
+1 2 | 3 5 5. 6_ | 5 3 1. 2_ | 3 3 2 2 | 1---`,
+    levels: [
+      {
+        difficulty: 'medium',
+        note: 'בית ופזמון',
+        tab: `1 2 | 3 5 5. 6_ | 5 3 1. 2_ | 3 3 2 1 | 2---
+1 2 | 3 5 5. 6_ | 5 3 1. 2_ | 3 3 2 2 | 1---
+4- 4- | 6- 6- | 6 5 5 3 | 1 2--
+1 2 | 3 5 5. 6_ | 5 3 1. 2_ | 3 3 2 2 | 1---`,
+      },
+    ],
+  },
+  {
+    id: 'yankee-doodle',
+    title: 'Yankee Doodle',
+    titleHe: 'יאנקי דודל',
+    difficulty: 'easy',
+    category: 'עממי',
+    tags: ['אמריקאי', 'עממי', 'ילדים'],
+    bpm: 120,
+    tab: `1' 1' 2' 3' | 1' 3' 2' 5
+1' 1' 2' 3' | 1'- 7-
+1' 1' 2' 3' | 4' 3' 2' 1'
+7 5 6 7 | 1'- 1'-`,
+  },
+  {
+    id: 'camptown-races',
+    title: 'Camptown Races',
+    titleHe: 'מרוצי קמפטאון',
+    artist: 'Stephen Foster',
+    difficulty: 'easy',
+    category: 'עממי',
+    tags: ['אמריקאי', 'עממי'],
+    bpm: 116,
+    tab: `5 5 3 5 | 6 5 3-
+3 2- - | 3 2- -
+5 5 3 5 | 6 5 3-
+2- 2 3 | 2 1--`,
+  },
+  {
+    id: 'michael-row',
+    title: 'Michael, Row the Boat Ashore',
+    titleHe: 'מייקל, חתור את הסירה',
+    difficulty: 'easy',
+    category: 'עממי',
+    tags: ['אמריקאי', 'עממי', 'רגוע'],
+    bpm: 96,
+    tab: `1 3 5- 3 5 6- | 5---
+3 5 6- | 5---
+3 5 5- 3 4 3- | 2---
+1 2 3- 2 1 2- | 1---`,
+  },
+  {
+    id: 'this-old-man',
+    title: 'This Old Man',
+    titleHe: 'הזקן הזה',
+    difficulty: 'easy',
+    category: 'ילדים',
+    tags: ['אמריקאי', 'אנגלי', 'ילדים'],
+    bpm: 108,
+    tab: `5 3 5- | 5 3 5-
+6 5 4 3 | 2 3 4-
+3 4 5 1 | 1 1 1_ 2_ 3_ 4_
+5- 5 2 | 2 4 3 2 | 1---`,
+  },
+  {
+    id: 'aura-lee',
+    title: 'Aura Lee',
+    titleHe: 'אורה לי',
+    artist: 'George R. Poulton',
+    difficulty: 'easy',
+    category: 'עממי',
+    tags: ['אמריקאי', 'רגוע'],
+    bpm: 76,
+    tab: `5 1' 7 1' | 2' 6 2'-
+1' 7 6 7 | 1'---
+5 1' 7 1' | 2' 6 2'-
+1' 7 6 7 | 1'---
+3' 3' 3' 3' | 3'- 3'-
+3' 2' 1' 2' | 3'---
+3' 3' 4' 3' | 2' 6 2'-
+1' 7 6 7 | 1'---`,
+  },
+  {
+    id: 'rain-rain',
+    title: 'Rain, Rain, Go Away',
+    titleHe: 'גשם גשם לך מכאן',
+    difficulty: 'easy',
+    category: 'ילדים',
+    tags: ['אמריקאי', 'אנגלי', 'ילדים', 'למתחילים'],
+    bpm: 100,
+    tab: `5 3- | 5 5 3-
+5 5 3 6 | 5 5 3-`,
   },
 ]

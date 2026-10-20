@@ -16,13 +16,27 @@ const FILTERS: [Filter, string][] = [
   ['mine', 'שלי'],
 ]
 
+/** Browse by place or mood: a song matches by tag or category. */
+const THEMES: [string, string][] = [
+  ['', 'כל הסגנונות'],
+  ['יפני', '🌸 יפן'],
+  ['אירופאי', '🏰 אירופה'],
+  ['אמריקאי', '🗽 אמריקה'],
+  ['קלאסי', '🎻 קלאסי'],
+  ['ילדים', '🧸 ילדים'],
+  ['חגים', '🎄 חגים'],
+  ['רגוע', '😌 רגוע'],
+]
+
 export const songs: Screen = (root, app) => {
   app.setTitle('שירים')
   let filter = load<Filter>('songFilter', 'all')
   let query = ''
+  let theme = load<string>('songTheme', '')
   root.innerHTML = html`
     <input id="sg-search" class="search" type="search" placeholder="🔎 חיפוש שיר" autocomplete="off" />
     <div id="sg-filters" class="filters"></div>
+    <div id="sg-themes" class="filters themes"></div>
     <div id="sg-list" class="song-list"></div>
     <a class="chip-btn primary center-btn" href="#/import">＋ הוסף שיר משלך</a>
     <div class="card">
@@ -39,12 +53,14 @@ export const songs: Screen = (root, app) => {
 
   function renderFilters() {
     $('sg-filters').innerHTML = FILTERS.map(([f, label]) => `<button class="filter${f === filter ? ' on' : ''}" data-f="${f}">${label}</button>`).join('')
+    $('sg-themes').innerHTML = THEMES.map(([t, label]) => `<button class="filter${t === theme ? ' on' : ''}" data-t="${t}">${label}</button>`).join('')
   }
 
   function matches(s: Song, favs: Set<string>) {
     if (filter === 'fav' && !favs.has(s.id)) return false
     if (filter === 'mine' && s.builtIn) return false
     if ((filter === 'easy' || filter === 'medium' || filter === 'hard') && !songLevels(s).some((l) => l.difficulty === filter)) return false
+    if (theme && s.category !== theme && !s.tags.includes(theme)) return false
     if (!query) return true
     const hay = [s.title, s.titleHe, s.artist, s.category, ...s.tags].join(' ').toLowerCase()
     return hay.includes(query.toLowerCase())
@@ -87,6 +103,14 @@ export const songs: Screen = (root, app) => {
     if (!f) return
     filter = f
     save('songFilter', f)
+    renderFilters()
+    renderList()
+  })
+  $('sg-themes').addEventListener('click', (e) => {
+    const t = (e.target as HTMLElement).closest<HTMLElement>('[data-t]')?.dataset.t
+    if (t === undefined) return
+    theme = t
+    save('songTheme', t)
     renderFilters()
     renderList()
   })
