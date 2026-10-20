@@ -171,4 +171,32 @@ describe('NoteDetector', () => {
     expect(names(calibrated)).toEqual(['G4', 'A4'])
     expect(Math.abs(calibrated[0].cents!)).toBeLessThan(5)
   })
+
+  describe('fast thumb runs (the left side went missing on a real iPhone)', () => {
+    const left = ['D4', 'F4', 'A4', 'C5', 'E5', 'G5', 'B5', 'D6']
+    const right = ['E4', 'G4', 'B4', 'D5', 'F5', 'A5', 'C6', 'E6']
+    const cases: [string, string[], number, number][] = [
+      ['left side out, 60 ms apart', left, 60, 16.7],
+      ['left side back in, 70 ms apart', [...left].reverse(), 70, 16.7],
+      ['right side out, 70 ms apart', right, 70, 16.7],
+      ['left side out, 80 ms apart at 30 fps', left, 80, 33.3],
+    ]
+    for (const [name, run, gap, hop] of cases) {
+      it(name, () => {
+        const sig = mix(renderPerformance(run.map((n, i) => ({ hz: hzOf(n), at: 0.3 + (i * gap) / 1000 })), 2.5, SR), quiet(2.5))
+        expect(names(detect(sig, hop))).toEqual(run)
+      })
+    }
+  })
+
+  it('does not count audio dropouts in a ringing note as new plucks', () => {
+    const melody = ['C4', 'E4', 'G4', 'C5', 'A4', 'F4', 'D4']
+    const sig = mix(renderPerformance(melody.map((n, i) => ({ hz: hzOf(n), at: 0.3 + i * 0.6 })), 4.8, SR), quiet(4.8))
+    // A 6 ms gap of digital silence 250 ms into every note, like a glitch.
+    melody.forEach((_, i) => {
+      const at = Math.floor((0.55 + i * 0.6) * SR)
+      sig.fill(0, at, at + Math.floor(0.006 * SR))
+    })
+    expect(names(detect(sig))).toEqual(melody)
+  })
 })

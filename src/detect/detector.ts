@@ -65,6 +65,8 @@ export interface DetectorConfig {
   levelEnvDecay: number
   hfEnvDecay: number
   refractoryMs: number
+  /** A different tine rising can start a new note this soon (fast runs). */
+  fastOnsetMs: number
   /** Level may fall at most this much from just before an onset to the decision. */
   maxDropDb: number
   /**
@@ -94,6 +96,7 @@ export const DEFAULT_CONFIG: Omit<DetectorConfig, 'sampleRate' | 'tines'> = {
   levelEnvDecay: 30,
   hfEnvDecay: 100,
   refractoryMs: 70,
+  fastOnsetMs: 35,
   maxDropDb: 6,
   minGrowth: 0.05,
 }
@@ -146,6 +149,10 @@ export class NoteDetector {
   private phase: DetectorPhase = 'idle'
   private onsetTime = 0
   private prevLevelDb = -Infinity
+  /** The last note's tine, while its growth may still spill into the next decision. */
+  private carry: { pos: number; until: number } | null = null
+  private glitchUntil = -Infinity
+  private windowMs: number
   private preOnsetDb = -Infinity
   /** Tine amplitudes from the last frame, and from just before the current onset. */
   private prevSalience: Float32Array
@@ -159,6 +166,7 @@ export class NoteDetector {
     this.yin = createYin(c.pitchWindow, { sampleRate: c.sampleRate, minHz: c.minHz, maxHz: c.maxHz, threshold: c.yinThreshold })
     this.salience = createSalience(c.frameSize, c.sampleRate, c.tines.map((t) => tineHz(t, c.offsets)))
     this.hfBuf = new Float32Array(c.levelWindow + 384)
+    this.windowMs = (c.frameSize / c.sampleRate) * 1000
     this.prevSalience = new Float32Array(c.tines.length)
     this.baseline = new Float32Array(c.tines.length)
     this.tineEnv = new Float32Array(c.tines.length).fill(-Infinity)
@@ -190,6 +198,14 @@ export class NoteDetector {
     const notes: NoteEvent[] = []
     const win = frame.length > c.frameSize ? frame.subarray(frame.length - c.frameSize) : frame
 
+    // An audio dropout (a run of exact zeros, which a real mic never gives)
+    // looks just like a tine muted and plucked again: its edges click and the
+    // tines dip and come back. Ignore onsets while it is in the newest
+    // samples, and keep it out of the capture baselines.
+    const dropout = hasDropout(win, 0)
+    if (hasDropout(win, win.length - 1536)) this.glitchUntil = time + 25
+    const glitch = time < this.glitchUntil
+
     const levelDb = rmsDb(win, c.levelWindow)
     // Over a whole beat period of neighbouring tines, so beating averages out.
     const steadyDb = rmsDb(win, c.pitchWindow)
@@ -207,19 +223,32 @@ export class NoteDetector {
     const first = !Number.isFinite(this.levelEnv)
     const levelRef = Math.max(this.levelEnv - (c.levelEnvDecay * dt) / 1000, this.noiseFloor)
     const hfRef = this.hfEnv - (c.hfEnvDecay * dt) / 1000
-    const tineRise = this.tineRise(sal, dt, gateDb)
+    const rising = this.tineRise(sal, dt, gateDb)
+    // Inside the refractory time only a different tine rising counts: that
+    // is the next note of a fast run, never a second onset of one pluck.
+    const lead = this.phase === 'capturing' ? this.leadingTine(sal) : -1
+    const carried = this.carry && time < this.carry.until ? c.tines.findIndex((t) => t.pos === this.carry!.pos) : -1
+    // A pluck lifts one tine (and a little of its neighbours); a click or a
+    // glitch lifts many at once, and must not cut a capture short.
+    // Only once the note being captured is clear, and not its frequency
+    // neighbours (which rise with it through leakage).
+    const near = (k: number, of: number) => of >= 0 && Math.abs(c.tines[k].midi - c.tines[of].midi) <= 2
+    const others = lead < 0 ? [] : rising.filter((k) => !near(k, lead) && !near(k, carried))
+    const runOnset = time - this.lastOnset >= c.fastOnsetMs && others.length > 0 && rising.length <= 4
     const onset =
       !first &&
+      !glitch &&
       time >= this.mutedUntil &&
       levelDb > gateDb &&
-      time - this.lastOnset >= c.refractoryMs &&
-      (tineRise ||
+      (runOnset ||
+        (time - this.lastOnset >= c.refractoryMs &&
+      (rising.length > 0 ||
         // The band must stand clear of its own floor: between plucks it
         // holds only faint, beating leakage from the fundamentals.
         (hfDb - this.hfFloor >= c.hfAboveFloorDb &&
           // A level jump alone can be two tines beating; a real pluck always
           // brings at least some high-band energy with it.
-          (hfDb - hfRef >= c.hfRiseDb || (levelDb - levelRef >= c.onsetRiseDb && hfDb - hfRef >= c.hfRiseDb / 2))))
+          (hfDb - hfRef >= c.hfRiseDb || (levelDb - levelRef >= c.onsetRiseDb && hfDb - hfRef >= c.hfRiseDb / 2))))))
     this.levelEnv = first ? levelDb : Math.max(levelDb, levelRef)
     this.hfEnv = first ? hfDb : Math.max(hfDb, hfRef)
     this.hfFloor = Math.min(hfDb, this.hfFloor + (3 * dt) / 1000)
@@ -229,6 +258,12 @@ export class NoteDetector {
     } else {
       if (this.phase === 'muted') this.phase = 'idle'
       if (onset) {
+        // A fast run: the next pluck lands while the last one is still being
+        // captured. Decide that one now, with what has grown so far.
+        if (this.phase === 'capturing') {
+          const note = this.pickGrowth(sal, gateDb, snapped, pitched ? raw : null)
+          if (note) notes.push(this.emit(note, this.onsetTime, time))
+        }
         // Start the baseline from the last frame before the onset.
         this.baseline.set(this.prevSalience)
         this.preOnsetDb = this.prevLevelDb
@@ -244,11 +279,11 @@ export class NoteDetector {
           // as a whole gets quieter: that is not a note.
           const added = steadyDb >= this.preOnsetDb - c.maxDropDb
           const note = added ? this.pickGrowth(sal, gateDb, snapped, pitched ? raw : null) : null
-          if (note) notes.push({ ...note, time: this.onsetTime, detectedAt: time })
+          if (note) notes.push(this.emit(note, this.onsetTime, time))
         } else {
           // Keep each tine's low point: a re-plucked tine dips under the
           // thumb first, and that shows in the frames around the onset.
-          for (let k = 0; k < sal.length; k++) this.baseline[k] = Math.min(this.baseline[k], sal[k])
+          if (!dropout) for (let k = 0; k < sal.length; k++) this.baseline[k] = Math.min(this.baseline[k], sal[k])
         }
       }
     }
@@ -261,10 +296,25 @@ export class NoteDetector {
     }
   }
 
+  /**
+   * Record a detected note. Its tine keeps "growing" in the long analysis
+   * window for a while after the pluck; until it has filled the window,
+   * that growth must not be taken for the next note.
+   */
+  private emit(note: { tine: Tine; hz: number; cents: number | null }, onset: number, now: number): NoteEvent {
+    this.carry = { pos: note.tine.pos, until: onset + this.windowMs + 25 }
+    return { ...note, time: onset, detectedAt: now }
+  }
+
   /** The tine that grew most since the baseline, if it grew enough to be a pluck. */
   private pickGrowth(sal: Float32Array, gateDb: number, snapped: Snapped | null, yin: PitchEstimate | null) {
     const { tines, minGrowth } = this.config
     const growth = Array.from(sal, (v, k) => v - this.baseline[k])
+    // The previous note may still be filling the window: not a new pluck.
+    if (this.carry && this.lastTime < this.carry.until) {
+      const k = tines.findIndex((t) => t.pos === this.carry!.pos)
+      if (k >= 0) growth[k] = 0
+    }
     let best = -1
     for (let k = 0; k < growth.length; k++) if (growth[k] > 0 && (best < 0 || growth[k] > growth[best])) best = k
     if (best < 0) return null
@@ -304,17 +354,31 @@ export class NoteDetector {
     return { tine, cents: null, hz: nominal }
   }
 
-  /** Does any tine rise `tineRiseDb` over its decaying envelope? Updates the envelopes. */
-  private tineRise(sal: Float32Array, dt: number, gateDb: number): boolean {
+  /** Tines rising `tineRiseDb` over their decaying envelopes. Updates the envelopes. */
+  private tineRise(sal: Float32Array, dt: number, gateDb: number): number[] {
     const { tineRiseDb, tineEnvDecay } = this.config
-    let rose = false
+    const rose: number[] = []
     for (let k = 0; k < sal.length; k++) {
       const db = 20 * Math.log10(sal[k] / Math.SQRT2 || 1e-9)
       const ref = this.tineEnv[k] - (tineEnvDecay * dt) / 1000
-      if (db > gateDb && db - ref >= tineRiseDb) rose = true
+      if (db > gateDb && db - ref >= tineRiseDb) rose.push(k)
       this.tineEnv[k] = Math.max(db, ref)
     }
     return rose
+  }
+
+  /** The tine clearly growing most in the capture under way, or -1 while unclear. */
+  private leadingTine(sal: Float32Array): number {
+    let best = -1
+    let bestGain = 0
+    for (let k = 0; k < sal.length; k++) {
+      const gain = sal[k] - this.baseline[k]
+      if (gain > bestGain) {
+        bestGain = gain
+        best = k
+      }
+    }
+    return best >= 0 && bestGain >= 0.25 * sal[best] ? best : -1
   }
 
   /** Level of the 2–8 kHz band over the newest `levelWindow` samples. */
@@ -341,6 +405,26 @@ export class NoteDetector {
     if (!(levelDb >= this.noiseFloor)) this.noiseFloor = levelDb
     else if (loudestTineDb < levelDb - 15) this.noiseFloor = Math.min(levelDb, this.noiseFloor + (3 * dt) / 1000)
   }
+}
+
+/**
+ * A run of at least 32 exact zeros between stretches of sound, from `from`
+ * on: dropped audio. Leading silence (a stream starting) does not count.
+ */
+function hasDropout(frame: Float32Array, from: number): boolean {
+  let run = 0
+  let soundBefore = false
+  for (let i = 0; i < frame.length; i++) {
+    if (frame[i] === 0) {
+      run++
+      continue
+    }
+    if (run >= 32 && soundBefore && i >= from) return true
+    run = 0
+    soundBefore = true
+  }
+  // Still going at the end of the frame.
+  return run >= 32 && soundBefore
 }
 
 /** Loudest tine amplitude as an RMS level in dB (a sine of peak A has RMS A/√2). */
