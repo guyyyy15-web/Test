@@ -73,6 +73,15 @@ function toast(text: string, ms = 6000) {
 }
 $('toast').addEventListener('click', () => ($('toast').hidden = true))
 
+// The mic stopped delivering sound (iOS after the background, a call…):
+// one tap reconnects it.
+engine.onMicLost = () => {
+  $('gate-text').textContent = 'המיקרופון הפסיק לשמוע (זה קורה באייפון אחרי מעבר לאפליקציה אחרת). הקש כדי לחבר אותו מחדש.'
+  $('gate-btn').textContent = '🎤 חבר מחדש'
+  $('gate').hidden = false
+  gateWaiters.push(() => {})
+}
+
 engine.onMuted = () => toast('🔇 לא שומעים את צליל ההדרכה? בדוק שמתג השקט בצד האייפון כבוי ושהעוצמה למעלה.')
 
 // ---- Router ----

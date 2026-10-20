@@ -555,3 +555,15 @@ a.chip-btn { text-decoration: none; display: inline-flex; align-items: center; }
 .continue div { display: flex; flex-direction: column; }
 .continue small { color: var(--muted); }
 .continue b { font-size: 18px; }
+
+.hud-side { display: flex; align-items: center; gap: 10px; }
+.mic-ind { display: inline-flex; align-items: center; gap: 6px; min-width: 44px; justify-content: flex-end; }
+.mic-ind i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(127, 127, 160, 0.5);
+  transition: transform 0.06s linear;
+}
+.mic-ind i.on { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+.mic-ind b { font-size: 16px; min-width: 18px; direction: ltr; }

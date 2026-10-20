@@ -326,7 +326,10 @@ function buildStage(root: HTMLElement, app: App, notes: SongNote[], onTap: (midi
         <div class="progress"><div id="g-prog"></div></div>
         <div class="hud-row">
           <span id="g-prompt" class="prompt"></span>
-          <span id="g-combo" class="combo"></span>
+          <span class="hud-side">
+            <span id="g-combo" class="combo"></span>
+            <span class="mic-ind" title="מה המיקרופון שומע"><i id="g-mic"></i><b id="g-heard"></b></span>
+          </span>
         </div>
       </div>
       <div class="stage">
@@ -360,6 +363,24 @@ function buildStage(root: HTMLElement, app: App, notes: SongNote[], onTap: (midi
   }
   layout()
   window.addEventListener('resize', layout)
+
+  // Mic indicator: a dot that follows the level (dim below the gate) and
+  // the last note heard, so it is always clear whether the app hears you.
+  const offFrame = app.engine.onFrame((info) => {
+    const v = Math.max(0, Math.min(1, (info.levelDb - info.gateDb + 6) / 36))
+    $('g-mic').style.transform = `scale(${0.6 + v * 0.9})`
+    $('g-mic').classList.toggle('on', info.levelDb > info.gateDb)
+  })
+  let heardTimer = 0
+  const offNote = app.engine.onNote((n) => {
+    const t = tineOf(n.tine.midi)
+    $('g-heard').textContent = degreeLabel(t)
+    $('g-heard').style.color = DEGREE_COLORS[t.degree]
+    clearTimeout(heardTimer)
+    heardTimer = window.setTimeout(() => ($('g-heard').textContent = ''), 1500)
+  })
+  if (!app.engine.listening) $('g-heard').textContent = '🔇'
+
   $('g-restart').addEventListener('click', restart)
   $('g-exit').addEventListener('click', exit)
 
@@ -381,6 +402,9 @@ function buildStage(root: HTMLElement, app: App, notes: SongNote[], onTap: (midi
     },
     dispose() {
       window.removeEventListener('resize', layout)
+      offFrame()
+      offNote()
+      clearTimeout(heardTimer)
     },
   }
 }

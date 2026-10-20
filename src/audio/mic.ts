@@ -30,10 +30,17 @@ export class MicInput {
     return this.stream?.getAudioTracks()[0]?.getSettings() ?? null
   }
 
+  /**
+   * Live and actually delivering audio. After the app goes to the background,
+   * iOS can leave the track "live" but muted, feeding silence for good.
+   */
   get isLive() {
     const track = this.stream?.getAudioTracks()[0]
-    return !!track && track.readyState === 'live' && this.ctx?.state === 'running'
+    return !!track && track.readyState === 'live' && !track.muted && this.ctx?.state === 'running'
   }
+
+  /** Called when the track is muted or ends under us (see isLive). */
+  onLost: (() => void) | null = null
 
   async start(): Promise<void> {
     if (!window.isSecureContext) throw new MicError('insecure', 'Not a secure context')
@@ -65,6 +72,11 @@ export class MicInput {
       throw new MicError('other', String(e))
     }
     await resumed
+    const track = this.stream.getAudioTracks()[0]
+    if (track) {
+      track.onmute = () => this.onLost?.()
+      track.onended = () => this.onLost?.()
+    }
 
     this.source = this.ctx.createMediaStreamSource(this.stream)
     this.analyser = this.ctx.createAnalyser()

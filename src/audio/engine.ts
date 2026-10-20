@@ -25,7 +25,26 @@ export class AudioEngine {
   private running = false
   private lastFrame = 0
 
-  constructor(private tuning: Tuning) {}
+  /**
+   * Called when listening has stopped working and a tap must reconnect the
+   * mic: the track was muted or ended, or it delivers exact digital silence
+   * (a working mic always picks up some noise).
+   */
+  onMicLost: (() => void) | null = null
+  private zeroSince = 0
+  private lostReported = false
+  private heardSound = false
+
+  constructor(private tuning: Tuning) {
+    this.mic.onLost = () => this.reportLost()
+  }
+
+  private reportLost() {
+    if (this.lostReported || !this.running) return
+    this.lostReported = true
+    this.heardSound = false
+    this.onMicLost?.()
+  }
 
   get started() {
     return this.synth !== null
@@ -51,6 +70,7 @@ export class AudioEngine {
     } else {
       this.detector.reset()
     }
+    this.zeroSince = 0
     if (!this.running) {
       this.running = true
       requestAnimationFrame(this.tick)
@@ -133,10 +153,26 @@ export class AudioEngine {
     if (!this.running) return
     requestAnimationFrame(this.tick)
     if (!this.detector || !this.mic.read(this.frame)) return
+    if (isDigitalSilence(this.frame)) {
+      this.zeroSince ||= now
+      if (this.heardSound && now - this.zeroSince > 3000) this.reportLost()
+    } else {
+      // Real sound again: a later loss deserves a new prompt. Until then, one
+      // prompt is enough (some headsets do send exact silence when quiet).
+      this.zeroSince = 0
+      this.heardSound = true
+      this.lostReported = false
+    }
     const { info, notes } = this.detector.process(this.frame, now)
     for (const n of notes) for (const fn of this.noteListeners) fn(n)
     const frameMs = this.lastFrame ? now - this.lastFrame : 0
     this.lastFrame = now
     for (const fn of this.frameListeners) fn(info, now, frameMs)
   }
+}
+
+/** Every sample of the newest 20 ms is exactly zero. */
+function isDigitalSilence(frame: Float32Array): boolean {
+  for (let i = frame.length - 960; i < frame.length; i++) if (frame[i] !== 0) return false
+  return true
 }
